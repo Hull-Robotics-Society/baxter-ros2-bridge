@@ -21,7 +21,8 @@ registrations of programs that have died, so a crashed node leaves its services 
 Consequence: a ROS 1 service that only appears after the bridge has started is not
 bridged until the bridge is restarted.
 
-Usage: existing_services.py <parameter namespace>     e.g. /baxter_bridge
+Usage: existing_services.py <parameter namespace> [--clock]     e.g. /baxter_bridge
+       --clock: also bridge /clock, the simulator's clock (run_bridge.sh: BRIDGE_CLOCK=1)
 """
 
 import sys
@@ -40,9 +41,12 @@ def split_by_direction(topics):
     return from_robot, to_robot
 
 
-def check_topics(master, namespace):
+def check_topics(master, namespace, clock=False):
     param = namespace + '/topics'
     wanted = master.getParam(param)
+    if clock:
+        # The simulator's clock (simulation time), for programs that follow it.
+        wanted.append({'topic': '/clock', 'type': 'rosgraph_msgs/msg/Clock'})
     from_robot, to_robot = split_by_direction(wanted)
     # Two lists, for two bridge processes (see run_bridge.sh).
     master.setParam(param, from_robot)
@@ -75,11 +79,12 @@ def main():
     import rosservice
 
     namespace = sys.argv[1] if len(sys.argv) > 1 else '/baxter_bridge'
+    clock = '--clock' in sys.argv[2:]
     param = namespace + '/services_2_to_1'
     master = rosgraph.Master('/baxter_bridge_setup')
 
     try:
-        check_topics(master, namespace)
+        check_topics(master, namespace, clock)
     except Exception as e:  # the bridge still starts, with the full topic list
         print('topics: could not check the message types: %r' % (e,), file=sys.stderr)
 

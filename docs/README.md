@@ -39,6 +39,7 @@ Guides for programming the lab's Baxter robots from ROS 2 with the Python librar
 | [rviz.md](rviz.md) | the robot in 3D on your screen (RViz 2) |
 | [moveit.md](moveit.md) | MoveIt 2: planned motions that avoid collisions, from the RViz panel or with `MotionPlanner` in a program |
 | [two-robots.md](two-robots.md) | two robots (or more) at the same time: a name, a settings file and a bridge per robot, `Robot('one')` in programs |
+| [simulation.md](simulation.md) | a simulated Baxter in Gazebo (branch `simulator`, work in progress) |
 | [trajectory-action.md](trajectory-action.md) | whole paths from other ROS 2 software such as MoveIt |
 
 ## Records

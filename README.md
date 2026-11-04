@@ -87,6 +87,7 @@ New here? After the setup above, follow the [quickstart](docs/quickstart.md).
 | [docs/rviz.md](docs/rviz.md) | the robot in 3D on your screen |
 | [docs/moveit.md](docs/moveit.md) | MoveIt 2: motions planned around the robot itself and around things in the way |
 | [docs/two-robots.md](docs/two-robots.md) | two robots at the same time, from one computer and one program |
+| [docs/simulation.md](docs/simulation.md) | a simulated Baxter in Gazebo (this branch only, work in progress) |
 | [docs/bridge-machine.md](docs/bridge-machine.md) | the bridge on a Windows laptop: WSL2 |
 | [docs/own-machine.md](docs/own-machine.md) | programming the robot from another computer than the bridge's |
 | [docs/mobility-base.md](docs/mobility-base.md) | the Dataspeed Mobility Base one robot stands on |
@@ -111,8 +112,10 @@ Limitations:
   `setup.sh` and `add_robot.sh` on a lab machine (they take the steps that were tested
   there by hand).
 
-A simulated Baxter (Rethink's simulator in Gazebo, run against the bridge like a real
-robot) is a work in progress on the branch `simulator`.
+**This branch, `simulator`,** adds a simulated Baxter: Rethink's simulator in Gazebo, run
+against the bridge like a real robot, with simulation time in the bridge, the trajectory
+action server and MoveIt ([docs/simulation.md](docs/simulation.md)). It is a work in
+progress and not part of a release; `main` has everything else.
 
 ## Layout
 

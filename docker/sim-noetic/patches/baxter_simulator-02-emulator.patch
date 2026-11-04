@@ -1,0 +1,23 @@
+Two changes in the program that emulates the robot's own interface. (1) init() promised a value and ended without returning one. Older compilers let that pass; with the current one the program crashed at start ('stack smashing detected') and no robot state was published at all. (2) OpenCV 4 (ROS Noetic) dropped the old name CV_LOAD_IMAGE_UNCHANGED; cv::IMREAD_UNCHANGED is the same value.
+
+diff --git a/baxter_sim_hardware/src/baxter_emulator.cpp b/baxter_sim_hardware/src/baxter_emulator.cpp
+index c22803f..e5c4ebe 100644
+--- a/baxter_sim_hardware/src/baxter_emulator.cpp
++++ b/baxter_sim_hardware/src/baxter_emulator.cpp
+@@ -261,6 +261,7 @@ bool baxter_emulator::init()
+   nav_light_sub = n.subscribe(BAXTER_NAV_LIGHT_TOPIC, 100, &baxter_emulator::nav_light_cb, this);
+   head_nod_sub = n.subscribe(BAXTER_HEAD_NOD_CMD_TOPIC, 100, &baxter_emulator::head_nod_cb, this);
+   head_nod_timer = n.createTimer(ros::Duration(1), &baxter_emulator::reset_head_nod, this, true, false);
++  return true;
+ }
+ 
+ /**
+@@ -280,7 +281,7 @@ void baxter_emulator::startPublishLoop(const std::string& img_path)
+   cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
+   try
+   {
+-    cv_ptr->image = cv::imread(img_path, CV_LOAD_IMAGE_UNCHANGED);
++    cv_ptr->image = cv::imread(img_path, cv::IMREAD_UNCHANGED);
+     if (cv_ptr->image.data)
+     {
+       cv_ptr->encoding = sensor_msgs::image_encodings::BGR8;

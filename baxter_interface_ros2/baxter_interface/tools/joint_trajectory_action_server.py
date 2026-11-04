@@ -60,6 +60,7 @@ Not yet run on the robot (written 6 Oct 2026).
 """
 
 import argparse
+import os
 import threading
 import time
 
@@ -67,7 +68,9 @@ import rclpy
 from control_msgs.action import FollowJointTrajectory
 from rclpy.action.server import ActionServer, CancelResponse, GoalResponse
 from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.duration import Duration
 from rclpy.executors import MultiThreadedExecutor
+from rclpy.parameter import Parameter
 from rclpy.utilities import ok as ros_is_running
 from rclpy.utilities import remove_ros_args
 from std_msgs.msg import UInt16
@@ -123,6 +126,8 @@ class ArmTrajectoryServer:
         self._robot = robot
         self._mode = mode
         self._rate = rate
+        # Simulation time: the node follows the simulation's clock (see _now()).
+        self._sim_time = bool(node.get_parameter('use_sim_time').value)
         self._curve = curve
         self._alive = True
         self._pid = {joint: PID() for joint in limb.joint_names()}
@@ -417,14 +422,24 @@ class ArmTrajectoryServer:
             return _CODES.INVALID_GOAL, f'{type(error).__name__}: {error}', None
 
     def _now(self):
-        """Seconds by the clock paths are timed with: the computer's own steady clock."""
+        """Seconds by the clock paths are timed with.
+
+        Normally the computer's own steady clock. With simulation time (use_sim_time, see
+        main()) the simulation's: a simulation that runs slower than real time then takes
+        the path more slowly too, instead of falling behind it.
+        """
+        if self._sim_time:
+            return self._node.get_clock().now().nanoseconds * 1e-9
         return time.monotonic()
 
     def _sleep(self, seconds):
         """Wait `seconds` by the same clock as _now()."""
         if seconds <= 0:
             return
-        time.sleep(seconds)
+        if self._sim_time:
+            self._node.get_clock().sleep_for(Duration(seconds=seconds))
+        else:
+            time.sleep(seconds)
 
     def _hold(self, number, angles):
         """Keep the arm at `angles` until a new goal, a hand on the cuff, or a disabled robot."""
@@ -473,6 +488,26 @@ class ArmTrajectoryServer:
         goal_handle.publish_feedback(feedback)
 
 
+def _wait_for_simulation_clock(node, seconds=10.0):
+    """With simulation time: wait until the simulation's clock is heard; exit if it is not.
+
+    Without that clock every path would wait for good.
+    """
+    executor = MultiThreadedExecutor()
+    executor.add_node(node)
+    end = time.monotonic() + seconds
+    while node.get_clock().now().nanoseconds == 0:
+        if time.monotonic() > end:
+            executor.remove_node(node)
+            raise SystemExit(
+                'Simulation time is switched on (USE_SIM_TIME), but no simulation clock '
+                f'arrives on {dataflow.full_name(node, "clock")} within {seconds:g} s. Is the '
+                'simulator running, and its bridge started with SIM_TIME=1 (.env.sim.example)?')
+        executor.spin_once(timeout_sec=0.1)
+    executor.remove_node(node)
+    executor.shutdown()
+
+
 def main():
     parser = argparse.ArgumentParser(description=(__doc__ or '').splitlines()[0])
     parser.add_argument('-l', '--limb', choices=['both', 'left', 'right'], default='both',
@@ -502,10 +537,18 @@ def main():
     suffix = '' if args.limb == 'both' else f'_{args.limb}'
     # In the namespace of the robot this server was started for, as the library's own node.
     namespace = get_node().get_namespace()
+    # Against the simulator: time paths by the simulation's clock (USE_SIM_TIME=1, which
+    # the settings file of the simulator sets; or --ros-args -p use_sim_time:=true). The
+    # bridge carries that clock as /clock, with a robot's name in front like the rest.
+    sim_time = os.environ.get('USE_SIM_TIME', '').strip().lower() in ('1', 'true', 'yes')
     node = rclpy.create_node(
         f'rsdk_{args.mode}_joint_trajectory_action_server{suffix}',
-        namespace=namespace
+        namespace=namespace,
+        parameter_overrides=[Parameter('use_sim_time', value=True)] if sim_time else [],
+        cli_args=['--ros-args', '-r', f'/clock:={namespace}/clock'] if namespace != '/' else None
     )
+    if node.get_parameter('use_sim_time').value:
+        _wait_for_simulation_clock(node)
     defaults = DEFAULTS[args.mode]
     node.declare_parameter('goal_time', defaults['goal_time'])
     node.declare_parameter('stopped_velocity_tolerance', defaults['stopped_velocity_tolerance'])

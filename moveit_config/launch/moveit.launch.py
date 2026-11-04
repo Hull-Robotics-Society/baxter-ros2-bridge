@@ -27,11 +27,16 @@ Five programs are started:
 The positions of the robot's parts go to /baxter_model/tf, as with RViz alone
 (robot_model/launch/view_robot.launch.py says why).
 
+Against the simulator, with SIM_TIME=1 in its settings file (the container then has
+USE_SIM_TIME=1): all five run on the simulation's clock, which the bridge carries as
+/clock. A simulation slower than real time then takes a motion more slowly instead of
+the arm falling behind it and the motion being stopped. `sim_time:=true` does the same.
+
 The robot model: by default the robot's own (robot_model:=robot), as in the original
 configuration. Every Baxter keeps it in its ROS 1 parameter /robot_description, with the
 arms' mounting points measured for that robot; the bridge passes it on as the topic
 robot/robot_description (docker/bridge-jazzy/robot_model.py), and this file waits up to
-30 s for it.
+30 s for it. The simulator's is the model it simulates, grippers included.
 robot_model:=generic takes baxter_common's general model instead (robot_model/), the
 same for every robot; robot_model:=<path> a model file of your own.
 
@@ -236,6 +241,11 @@ def start(context):
     settings = moveit.to_dict()
     settings.update(limits)
 
+    # Simulation time: a parameter for every node, and the clock under the robot's name.
+    sim_time = switched_on(context, 'sim_time')
+    clock = {'use_sim_time': sim_time}
+    clock_topic = [('/clock', namespace + '/clock')] if namespace else []
+
     robot_state = [
         ('joint_states', 'moveit/joint_states'),
         ('/tf', namespace + '/baxter_model/tf'),
@@ -267,20 +277,23 @@ def start(context):
             package='baxter_moveit_config',
             executable='joint_states_for_moveit.py',
             namespace=namespace,
-            parameters=[moveit.robot_description]
+            parameters=[moveit.robot_description, clock],
+            remappings=clock_topic
         ),
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
             namespace=namespace,
-            parameters=[moveit.robot_description],
-            remappings=robot_state
+            parameters=[moveit.robot_description, clock],
+            remappings=robot_state + clock_topic
         ),
         Node(
             package='baxter_interface',
             executable='joint_trajectory_action_server',
             namespace=namespace,
             output='screen',
+            # The server reads USE_SIM_TIME itself; this makes sim_time:=true reach it too.
+            additional_env={'USE_SIM_TIME': '1' if sim_time else '0'},
             condition=IfCondition(LaunchConfiguration('server'))
         ),
         Node(
@@ -288,8 +301,8 @@ def start(context):
             executable='move_group',
             namespace=namespace,
             output='screen',
-            parameters=[settings, execution],
-            remappings=robot_state + action_remappings()
+            parameters=[settings, execution, clock],
+            remappings=robot_state + action_remappings() + clock_topic
         ),
         Node(
             package='rviz2',
@@ -302,8 +315,9 @@ def start(context):
                 moveit.robot_description_kinematics,
                 moveit.planning_pipelines,
                 limits,
+                clock,
             ],
-            remappings=robot_state,
+            remappings=robot_state + clock_topic,
             condition=IfCondition(LaunchConfiguration('rviz'))
         ),
     ]
@@ -327,6 +341,11 @@ def generate_launch_description():
             default_value='',
             description='Top acceleration for every joint in rad/s^2 '
                         '(empty: the values of config/joint_limits.yaml)'
+        ),
+        DeclareLaunchArgument(
+            'sim_time',
+            default_value=os.environ.get('USE_SIM_TIME', '0'),
+            description="Run on the simulation's clock (/clock); for the simulator"
         ),
         DeclareLaunchArgument(
             'robot_model',

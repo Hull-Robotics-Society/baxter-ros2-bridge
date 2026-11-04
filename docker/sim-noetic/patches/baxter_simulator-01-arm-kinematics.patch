@@ -1,0 +1,101 @@
+Four changes. (1) The robot-model library (urdf) hands out std::shared_ptr since ROS Melodic, no longer boost::shared_ptr; its own type names work in both. (2) The simulator switches gravity off for the arms at start, but did so before the robot was fully in the world: the setting was lost, and a shoulder then pushed against the arm's full weight without reaching its target (0.42 rad short of the neutral pose). It now waits for the robot, then checks every arm link and repeats the step until it holds. (3) Inverse kinematics answered every request with 'no solution': the solver of the current KDL library refuses a result array that is not sized to the number of joints, which older versions did themselves. The array is sized now. (4) Inverse kinematics looked the frames up at the time stamped on the request. A caller outside the simulation stamps the real time of day while the simulation counts from zero; it now uses the newest known frames. (Change 4 was made before the real cause, 3, was found; it is kept because the mismatch of the two clocks is real, but it is not shown to be needed.)
+
+diff --git a/baxter_sim_kinematics/src/arm_kinematics.cpp b/baxter_sim_kinematics/src/arm_kinematics.cpp
+index 453b37d..19b25fa 100644
+--- a/baxter_sim_kinematics/src/arm_kinematics.cpp
++++ b/baxter_sim_kinematics/src/arm_kinematics.cpp
+@@ -85,6 +85,15 @@ bool Kinematics::init_grav()
+   gazebo_msgs::SetLinkProperties setlinkproperties;
+   gazebo_msgs::GetLinkProperties getlinkproperties;
+ 
++  // Wait until the robot itself is in the simulation. The services above exist as soon as
++  // Gazebo runs, but the robot is put into the world a moment later; the properties of a
++  // link that is not there yet cannot be changed, and gravity would stay on for the arms.
++  getlinkproperties.request.link_name = "left_upper_shoulder";
++  while (ros::ok() && !(get_lp_client.call(getlinkproperties) && getlinkproperties.response.success))
++  {
++    ros::WallDuration(0.2).sleep();
++  }
++
+   // Load the right chain and copy them to Right specific variables
+   tip_name = grav_right_name;
+   if (!loadModel(result))
+@@ -172,6 +181,45 @@ bool Kinematics::init_grav()
+     set_lp_client.call(setlinkproperties);
+   }
+ 
++  // Check that gravity really is off for every link of both arms, and switch it off again
++  // where it is not. A link set while the robot was still being put into the world loses
++  // the setting again (seen: left arm without gravity, right arm with). Done when all
++  // links have reported "off" for two seconds in a row; gives up after a minute.
++  std::vector<std::string> arm_links;
++  for (int i = 0; i < grav_chain_r.getNrOfSegments(); i++)
++    arm_links.push_back(grav_chain_r.getSegment(i).getName());
++  for (int i = 0; i < grav_chain_l.getNrOfSegments(); i++)
++    arm_links.push_back(grav_chain_l.getSegment(i).getName());
++  int rounds_all_off = 0;
++  for (int round = 0; ros::ok() && round < 300 && rounds_all_off < 10; round++)
++  {
++    bool all_off = true;
++    for (size_t i = 0; i < arm_links.size(); i++)
++    {
++      getlinkproperties.request.link_name = arm_links[i];
++      if (!get_lp_client.call(getlinkproperties) || !getlinkproperties.response.success)
++        continue;  // not a link of its own in the simulation (fixed to its neighbour)
++      if (!getlinkproperties.response.gravity_mode)
++        continue;
++      all_off = false;
++      setlinkproperties.request.link_name = arm_links[i];
++      setlinkproperties.request.com = getlinkproperties.response.com;
++      setlinkproperties.request.mass = getlinkproperties.response.mass;
++      setlinkproperties.request.ixx = getlinkproperties.response.ixx;
++      setlinkproperties.request.iyy = getlinkproperties.response.iyy;
++      setlinkproperties.request.izz = getlinkproperties.response.izz;
++      setlinkproperties.request.ixy = getlinkproperties.response.ixy;
++      setlinkproperties.request.iyz = getlinkproperties.response.iyz;
++      setlinkproperties.request.ixz = getlinkproperties.response.ixz;
++      setlinkproperties.request.gravity_mode = false;
++      set_lp_client.call(setlinkproperties);
++    }
++    rounds_all_off = all_off ? rounds_all_off + 1 : 0;
++    ros::WallDuration(0.2).sleep();
++  }
++  if (rounds_all_off < 10)
++    ROS_ERROR_NAMED("arm_kinematics", "Gravity could not be switched off for all arm links; the arms will sag.");
++
+   // Create a gravity solver for the left chain
+   gravity_solver_l = new KDL::ChainIdSolver_RNE(grav_chain_l, KDL::Vector(0.0, 0.0, -9.8));
+   return true;
+@@ -264,8 +312,8 @@ bool Kinematics::loadModel(const std::string xml)
+ bool Kinematics::readJoints(urdf::Model& robot_model)
+ {
+   num_joints = 0;
+-  boost::shared_ptr<const urdf::Link> link = robot_model.getLink(tip_name);
+-  boost::shared_ptr<const urdf::Joint> joint;
++  urdf::LinkConstSharedPtr link = robot_model.getLink(tip_name);
++  urdf::JointConstSharedPtr joint;
+   for (int i = 0; i < chain.getNrOfSegments(); i++)
+     while (link && link->name != root_name)
+     {
+@@ -440,12 +488,21 @@ bool arm_kinematics::Kinematics::getPositionIK(const geometry_msgs::PoseStamped&
+   tf::Stamped<tf::Pose> transform;
+   tf::Stamped<tf::Pose> transform_root;
+   tf::poseStampedMsgToTF(pose_msg_in, transform);
++  // Use the newest known positions of the frames, whatever time the request carries. A
++  // caller outside the simulation stamps its request with the real time of day, while the
++  // simulation counts its own seconds from zero; looked up at that time, the frames are
++  // "in the future" and every request was answered with "no solution".
++  transform.stamp_ = ros::Time(0);
+ 
+   // Do the IK
+   KDL::JntArray jnt_pos_in;
+   KDL::JntArray jnt_pos_out;
+ 
+   jnt_pos_in.resize(num_joints);
++  // The solver of the current KDL library refuses a result array that does not have one
++  // place per joint (older versions sized it themselves); without this line every request
++  // was answered with "no solution".
++  jnt_pos_out.resize(num_joints);
+   // Copying the positions of the joints relative to its index in the KDL chain
+   for (unsigned int i = 0; i < num_joints; i++)
+   {

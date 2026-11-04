@@ -48,6 +48,8 @@ services:
       # ROS 1 system next to the robot, such as the Mobility Base (.env.base.example).
       - BRIDGE_CONFIG=${BRIDGE_CONFIG:-/config/topics.yaml}
       - BRIDGE_PARAM_NS=${BRIDGE_PARAM_NS:-/baxter_bridge}
+      # Simulator only: carry its clock, /clock (simulation time; .env.sim.example).
+      - BRIDGE_CLOCK=${SIM_TIME:-0}
       # ROS 2 network settings file from bridge_config/dds/: "default" changes nothing,
       # "wsl" is needed when the bridge machine is WSL2 (see docs/bridge-machine.md).
       - FASTRTPS_DEFAULT_PROFILES_FILE=/config/dds/${DDS_PROFILE:-default}.xml
@@ -86,6 +88,8 @@ services:
       # Only with several robots: the name of the robot the programs started here are
       # for, taken from the settings file (--env-file .env.one). See docs/two-robots.md.
       - BAXTER_ROBOT=${ROBOT_NAME:-}
+      # Simulator only: time arm paths by the simulation's clock (.env.sim.example).
+      - USE_SIM_TIME=${SIM_TIME:-0}
     volumes:
       - ./bridge_config/dds:/config/dds:ro
       # The time zone of this machine. Without it programs in the container run on world
@@ -112,6 +116,8 @@ services:
       - ROS_AUTOMATIC_DISCOVERY_RANGE=${ROS_AUTOMATIC_DISCOVERY_RANGE:-SUBNET}
       - FASTRTPS_DEFAULT_PROFILES_FILE=/config/dds/${DDS_PROFILE:-default}.xml
       - BAXTER_ROBOT=${ROBOT_NAME:-}
+      # Simulator only: time arm paths by the simulation's clock (.env.sim.example).
+      - USE_SIM_TIME=${SIM_TIME:-0}
     volumes:
       - ./bridge_config/dds:/config/dds:ro
       - /etc/localtime:/etc/localtime:ro
@@ -165,6 +171,8 @@ services:
       - FASTRTPS_DEFAULT_PROFILES_FILE=/config/dds/${DDS_PROFILE:-default}.xml
       # Only with several robots: the robot MoveIt and the programs started here are for.
       - BAXTER_ROBOT=${ROBOT_NAME:-}
+      # Simulator only: MoveIt and the action server on the simulation's clock.
+      - USE_SIM_TIME=${SIM_TIME:-0}
       # Which arms have Rethink's electric gripper (settings file; docs/moveit.md).
       - LEFT_ELECTRIC_GRIPPER=${LEFT_ELECTRIC_GRIPPER:-0}
       - RIGHT_ELECTRIC_GRIPPER=${RIGHT_ELECTRIC_GRIPPER:-0}
@@ -179,6 +187,36 @@ services:
       - ${PROJECT_DIR:-.}:/project
       - ./examples:/examples
     working_dir: /project
+    profiles: ["tools"]
+
+  # A simulated Baxter instead of the real one (Rethink's simulator in Gazebo); see
+  # docs/simulation.md. It is a ROS 1 system of its own on this machine, and the bridge
+  # connects to it exactly as to the robot:
+  #   docker compose --env-file .env.sim up -d sim
+  #   docker compose --env-file .env.sim up -d bridge          (once the simulator is ready)
+  #   docker compose --env-file .env.sim run --rm client python3 examples/01_read_robot.py
+  #   docker compose --env-file .env.sim --profile tools down
+  sim:
+    build:
+      context: .
+      dockerfile: docker/sim-noetic/Dockerfile
+    image: baxter-sim-noetic:1.2.0
+    network_mode: host
+    environment:
+      # The simulator brings its own ROS 1 system, on this machine, at the port named
+      # in the settings file. Two simulators next to each other need different ports for
+      # it and for Gazebo itself (.env.sim.example).
+      - ROS_MASTER_URI=${ROS_MASTER_URI:-http://127.0.0.1:11311}
+      - ROS_IP=127.0.0.1
+      - GAZEBO_MASTER_URI=http://127.0.0.1:${SIM_GAZEBO_PORT:-11345}
+      - DISPLAY=${DISPLAY:-:0}
+      # Draw without the graphics card's own driver; slower, but works everywhere.
+      - LIBGL_ALWAYS_SOFTWARE=${SIM_SOFTWARE_RENDERING:-1}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix    # the screen of the machine Docker runs on
+    # SIM_WINDOW=false in the env file runs it without Gazebo's window.
+    command: ["roslaunch", "/opt/baxter_sim/baxter_sim.launch", "gui:=${SIM_WINDOW:-true}"]
     profiles: ["tools"]
 
   # Robot inventory (read only): docker compose run --rm inventory

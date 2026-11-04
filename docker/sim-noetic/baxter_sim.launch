@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Starts Rethink's simulator (baxter_world.launch) and what this project adds to it.
+
+     gui:=true   Gazebo's window and the "Baxter IO" window with the cuff buttons and
+                 navigators to click.
+     gui:=false  no windows. The Baxter IO program still runs, invisibly, because it is
+                 what publishes the cuff sensors, cuff buttons and navigators; without it
+                 the library's Navigator class and the trajectory server find nothing. -->
+<launch>
+  <arg name="gui" default="true"/>
+
+  <!-- The simulation's clock 100 times per second, not at every step (about 750 per
+       second): it is carried through the bridge for simulation time (.env.sim.example). -->
+  <param name="/gazebo/pub_clock_frequency" value="100"/>
+
+  <include file="$(find baxter_gazebo)/launch/baxter_world.launch">
+    <arg name="gui" value="$(arg gui)"/>
+  </include>
+
+  <!-- baxter_world.launch starts Baxter IO itself when gui is true. -->
+  <node unless="$(arg gui)" name="baxter_sim_io" pkg="baxter_sim_io" type="baxter_sim_io" respawn="false" output="screen">
+    <env name="QT_QPA_PLATFORM" value="offscreen"/>
+  </node>
+
+  <!-- What the real robot has and the simulator lacks (see sim_extras.py). -->
+  <node name="baxter_sim_extras" pkg="baxter_sim_hardware" type="sim_extras.py" respawn="true" output="screen"/>
+</launch>

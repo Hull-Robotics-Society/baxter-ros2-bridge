@@ -1,8 +1,9 @@
-# Optional addition to compose.yaml for a bridge machine that is WSL2: lets the RViz and
-# MoveIt containers draw with the computer's graphics card (also a laptop's built-in
-# one) instead of on the processor. See docs/rviz.md.
+# Optional addition to compose.yaml for a bridge machine that is WSL2: lets RViz and the
+# simulator (its windows and its cameras) draw with the computer's graphics card (also a
+# laptop's built-in one) instead of on the processor. See docs/rviz.md and
+# docs/simulation.md, "Graphics card".
 #
-# Switch it on with this line in .env:
+# Switch it on per settings file, with this line in .env and/or .env.sim:
 #   COMPOSE_FILE=compose.yaml:compose.wsl-gpu.yaml
 #
 # How it works: WSL2 offers the Windows graphics driver to Linux as the device /dev/dxg
@@ -20,6 +21,16 @@ services:
       - GALLIUM_DRIVER=d3d12
       - LIBGL_ALWAYS_SOFTWARE=0
   moveit:
+    devices:
+      - /dev/dxg
+    volumes:
+      - /usr/lib/wsl:/usr/lib/wsl:ro
+    environment:
+      - LD_LIBRARY_PATH=/usr/lib/wsl/lib
+      - GALLIUM_DRIVER=d3d12
+      - LIBGL_ALWAYS_SOFTWARE=0
+  # On the main branch this file ends here: the simulator only exists on this branch.
+  sim:
     devices:
       - /dev/dxg
     volumes:

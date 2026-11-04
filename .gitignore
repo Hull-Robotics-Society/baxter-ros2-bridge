@@ -8,11 +8,12 @@ __pycache__/
 *.vdi
 .vscode/
 .env
-# per-machine copies such as .env.robot1, .env.robot2 (the examples are kept)
+# per-machine copies such as .env.sim, .env.robot1, .env.robot2 (the examples are kept)
 .env.*
 !.env.example
 !.env.base.example
 !.env.robot.example
+!.env.sim.example
 # the robot model, downloaded by robot_model/fetch_model.sh
 robot_model/urdf/
 robot_model/meshes/

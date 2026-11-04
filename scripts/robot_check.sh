@@ -208,6 +208,7 @@ done
 
 cd "$(dirname "$0")/.." || exit 1
 # Which settings file: .env, or the one named in ENV_FILE, for example to check against
+# the simulator:  ENV_FILE=.env.sim bash scripts/robot_check.sh --from bridge
 ENV_FILE="${ENV_FILE:-.env}"
 if [ ! -f compose.yaml ] || [ ! -f "$ENV_FILE" ]; then
   echo "Run this from the repository, with a $ENV_FILE file (see .env.example)." >&2; exit 1

@@ -1,0 +1,66 @@
+The simulated cameras. (1) They publish under /sim/cameras/... instead of /cameras/...: sim_extras.py passes on only the cameras that are open, as the real robot's camera services do. (2) Pictures are 640 x 400 like the robot's default, instead of 800 x 800.
+
+diff --git a/baxter_description/urdf/baxter_base/baxter_base.gazebo.xacro b/baxter_description/urdf/baxter_base/baxter_base.gazebo.xacro
+index 5fc6593..c519f84 100644
+--- a/baxter_description/urdf/baxter_base/baxter_base.gazebo.xacro
++++ b/baxter_description/urdf/baxter_base/baxter_base.gazebo.xacro
+@@ -63,8 +63,8 @@
+         <pose>0.0 0.21 0.0 0.0 -0.8 -1.570796327 </pose>
+         <horizontal_fov>1.3962634</horizontal_fov>
+         <image>
+-          <width>800</width>
+-          <height>800</height>
++          <width>640</width>
++          <height>400</height>
+           <format>R8G8B8</format>
+         </image>
+         <clip>
+@@ -90,7 +90,7 @@
+         <distortionK3>0.0</distortionK3>
+         <distortionT1>0.0</distortionT1>
+         <distortionT2>0.0</distortionT2>
+-        <robotNamespace>/cameras</robotNamespace>
++        <robotNamespace>/sim/cameras</robotNamespace>
+       </plugin>
+     </sensor>
+   </gazebo>
+@@ -101,8 +101,8 @@
+         <pose>0.0 0.0 0.0 0.0 -1.570796327 1.570796327 </pose>
+         <horizontal_fov>1.3962634</horizontal_fov>
+         <image>
+-          <width>800</width>
+-          <height>800</height>
++          <width>640</width>
++          <height>400</height>
+           <format>R8G8B8</format>
+         </image>
+         <clip>
+@@ -128,7 +128,7 @@
+         <distortionK3>0.0</distortionK3>
+         <distortionT1>0.0</distortionT1>
+         <distortionT2>0.0</distortionT2>
+-        <robotNamespace>/cameras</robotNamespace>
++        <robotNamespace>/sim/cameras</robotNamespace>
+       </plugin>
+     </sensor>
+   </gazebo>
+@@ -139,8 +139,8 @@
+         <pose>0.0 0.0 0.0 0.0 -1.570796327 1.570796327 </pose>
+         <horizontal_fov>1.3962634</horizontal_fov>
+         <image>
+-          <width>800</width>
+-          <height>800</height>
++          <width>640</width>
++          <height>400</height>
+           <format>R8G8B8</format>
+         </image>
+         <clip>
+@@ -166,7 +166,7 @@
+         <distortionK3>0.0</distortionK3>
+         <distortionT1>0.0</distortionT1>
+         <distortionT2>0.0</distortionT2>
+-        <robotNamespace>/cameras</robotNamespace>
++        <robotNamespace>/sim/cameras</robotNamespace>
+       </plugin>
+     </sensor>
+   </gazebo>

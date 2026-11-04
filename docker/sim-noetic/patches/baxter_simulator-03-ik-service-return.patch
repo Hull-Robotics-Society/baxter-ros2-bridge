@@ -1,0 +1,14 @@
+The inverse kinematics service's function promised a value and ended without returning one; with the current compiler the service never answered.
+
+diff --git a/baxter_sim_kinematics/src/position_kinematics.cpp b/baxter_sim_kinematics/src/position_kinematics.cpp
+index 39c659b..5daa003 100644
+--- a/baxter_sim_kinematics/src/position_kinematics.cpp
++++ b/baxter_sim_kinematics/src/position_kinematics.cpp
+@@ -219,6 +219,7 @@ bool position_kinematics::IKCallback(baxter_core_msgs::SolvePositionIK::Request&
+       res.result_type[req_index] = baxter_core_msgs::SolvePositionIKResponse::RESULT_INVALID;
+   }
+   loop_rate.sleep();
++  return true;
+ }
+ 
+ }  // namespace

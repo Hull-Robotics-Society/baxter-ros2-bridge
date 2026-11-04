@@ -169,7 +169,11 @@ fi
 # - the topics are split into commands to the robot and everything else;
 # - only the ROS 1 services that exist right now are bridged: calling a bridged service
 #   that the ROS 1 side does not provide would stop the services bridge.
-ros1_only /opt/baxter/existing_services.py "${NS}" || true
+# BRIDGE_CLOCK=1 (the simulator's settings file sets it through SIM_TIME): also carry the
+# simulation's clock, /clock, for programs that run on simulation time.
+CLOCK_ARG=()
+[ "${BRIDGE_CLOCK:-0}" = "1" ] && CLOCK_ARG=(--clock)
+ros1_only /opt/baxter/existing_services.py "${NS}" "${CLOCK_ARG[@]}" || true
 rosparam set "${NS}/none" "[]"
 
 # A robot with a name: robot_prefix.py puts the name in front of every name in the lists
