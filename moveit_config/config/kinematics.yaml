@@ -1,0 +1,13 @@
+# How MoveIt works out joint angles for a hand pose, per planning group: KDL, MoveIt's
+# general solver, with the settings of the configuration Rethink Robotics and MoveIt
+# shipped for Baxter (reference/moveit_robots_baxter). Its "kinematics_solver_attempts: 3"
+# has no counterpart in MoveIt 2. (The original also has IKFast solvers for both arms,
+# switched off there; they are not ported.)
+left_arm:
+  kinematics_solver: kdl_kinematics_plugin/KDLKinematicsPlugin
+  kinematics_solver_search_resolution: 0.005
+  kinematics_solver_timeout: 0.005
+right_arm:
+  kinematics_solver: kdl_kinematics_plugin/KDLKinematicsPlugin
+  kinematics_solver_search_resolution: 0.005
+  kinematics_solver_timeout: 0.005

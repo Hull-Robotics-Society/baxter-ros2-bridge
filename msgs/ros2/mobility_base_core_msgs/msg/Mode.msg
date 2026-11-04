@@ -1,0 +1,15 @@
+# Ported from ROS 1 by scripts/port_msgs_to_ros2.py:
+#   type Header -> std_msgs/Header (header)
+std_msgs/Header header
+
+uint8 mode
+
+uint8 MODE_ESTOP=0
+uint8 MODE_DISABLED=1
+uint8 MODE_BATTERY_LIMP_HOME=4
+uint8 MODE_BATTERY_CRITICAL=5
+uint8 MODE_MOTOR_FAULT=7
+uint8 MODE_WIRELESS=8
+uint8 MODE_TIMEOUT=16
+uint8 MODE_VELOCITY=17
+uint8 MODE_VELOCITY_RAW=18

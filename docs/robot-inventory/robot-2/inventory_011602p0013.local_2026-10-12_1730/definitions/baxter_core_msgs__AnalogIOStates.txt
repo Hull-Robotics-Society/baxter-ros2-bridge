@@ -1,0 +1,10 @@
+type: baxter_core_msgs/AnalogIOStates
+md5: 0a05ba3bbb53a8a3b164e34946d619f7
+
+string[]         names
+AnalogIOState[] states
+================================================================================
+MSG: baxter_core_msgs/AnalogIOState
+time timestamp
+float64 value
+bool isInputOnly

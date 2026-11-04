@@ -1,0 +1,14 @@
+Baxter inventory, Mon Oct 12 17:39:15 BST 2026
+ROS master:        http://NUC:11311
+Software version:  <not set; see version_params.txt>
+Nodes / topics / services: 5 / 36 / 18
+Checksums vs. this machine's messages:
+  MATCH: 8
+  DIFFERENT: 0
+  NOT_INSTALLED: 5
+Baxter / Mobility Base types that DIFFER:
+Not checked (no messages during the recording; verify by commanding the robot):
+  6 types, of which Baxter / Mobility Base:
+Mobility Base topics: 32 (see mobility_base.txt)
+Machines the nodes run on: 1
+  NUC: 5 nodes, e.g. /mobility_base/driver; reachable (169.254.170.103)

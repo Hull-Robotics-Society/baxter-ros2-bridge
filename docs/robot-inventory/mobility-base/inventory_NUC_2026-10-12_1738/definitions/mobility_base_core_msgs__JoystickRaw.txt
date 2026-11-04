@@ -1,0 +1,38 @@
+type: mobility_base_core_msgs/JoystickRaw
+md5: cd2ba0d7e4dfc4d76d8484f6adc8f3c0
+
+Header header
+
+# Pulse width in microseconds
+uint16[6] channels
+
+# Limits in microseconds
+uint16 MIN=1100
+uint16 MAX=1900
+uint16 CENTER=1500
+
+# Channel index
+uint8 CHAN_ENABLE=0
+uint8 CHAN_ROTATE=1
+uint8 CHAN_FORWARD=2
+uint8 CHAN_LATERAL=3
+uint8 CHAN_MODE=4
+uint8 CHAN_EXTRA=5
+
+================================================================================
+MSG: std_msgs/Header
+# Standard metadata for higher-level stamped data types.
+# This is generally used to communicate timestamped data 
+# in a particular coordinate frame.
+# 
+# sequence ID: consecutively increasing ID 
+uint32 seq
+#Two-integer timestamp that is expressed as:
+# * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
+# * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
+# time-handling sugar is provided by the client library
+time stamp
+#Frame this data is associated with
+# 0: no frame
+# 1: global frame
+string frame_id

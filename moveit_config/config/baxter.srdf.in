@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- What MoveIt needs to know about Baxter beyond the robot model: which joints form an
+     arm, named postures, and which pairs of parts never need a collision check.
+
+     Groups, end effectors and postures are those of the configuration Rethink Robotics
+     and MoveIt shipped for Baxter (reference/moveit_robots_baxter, baxter_base.srdf.xacro),
+     with the hand's tip at left_gripper / right_gripper as its default.
+
+     This file is the hand-written part. config/baxter.srdf is made from it by
+     scripts/make_srdf.py, which adds the original configuration's pairs of parts that are
+     not checked. Edit this file, then run the script. -->
+<robot name="baxter">
+  <group name="left_arm">
+    <chain base_link="torso" tip_link="left_gripper"/>
+  </group>
+  <group name="right_arm">
+    <chain base_link="torso" tip_link="right_gripper"/>
+  </group>
+  <group name="both_arms">
+    <group name="right_arm"/>
+    <group name="left_arm"/>
+  </group>
+  <group name="left_hand">
+    <chain base_link="left_hand" tip_link="left_gripper"/>
+  </group>
+  <group name="right_hand">
+    <chain base_link="right_hand" tip_link="right_gripper"/>
+  </group>
+
+  <!-- The hands, as MoveIt's "end effectors": what is dragged in RViz. -->
+  <end_effector name="left_hand_eef" parent_link="left_gripper" group="left_hand" parent_group="left_arm"/>
+  <end_effector name="right_hand_eef" parent_link="right_gripper" group="right_hand" parent_group="right_arm"/>
+
+  <!-- Named postures, as in the original. They are Limb.move_to_neutral()'s posture. -->
+  <group_state name="left_neutral" group="left_arm">
+    <joint name="left_e0" value="0"/>
+    <joint name="left_e1" value="0.75"/>
+    <joint name="left_s0" value="0"/>
+    <joint name="left_s1" value="-0.55"/>
+    <joint name="left_w0" value="0"/>
+    <joint name="left_w1" value="1.26"/>
+    <joint name="left_w2" value="0"/>
+  </group_state>
+  <group_state name="right_neutral" group="right_arm">
+    <joint name="right_e0" value="0"/>
+    <joint name="right_e1" value="0.75"/>
+    <joint name="right_s0" value="0"/>
+    <joint name="right_s1" value="-0.55"/>
+    <joint name="right_w0" value="0"/>
+    <joint name="right_w1" value="1.26"/>
+    <joint name="right_w2" value="0"/>
+  </group_state>
+  <!-- Not in the original: the same for both arms at once. -->
+  <group_state name="both_neutral" group="both_arms">
+    <joint name="left_e0" value="0"/>
+    <joint name="left_e1" value="0.75"/>
+    <joint name="left_s0" value="0"/>
+    <joint name="left_s1" value="-0.55"/>
+    <joint name="left_w0" value="0"/>
+    <joint name="left_w1" value="1.26"/>
+    <joint name="left_w2" value="0"/>
+    <joint name="right_e0" value="0"/>
+    <joint name="right_e1" value="0.75"/>
+    <joint name="right_s0" value="0"/>
+    <joint name="right_s1" value="-0.55"/>
+    <joint name="right_w0" value="0"/>
+    <joint name="right_w1" value="1.26"/>
+    <joint name="right_w2" value="0"/>
+  </group_state>
+
+  <!-- The robot stands still in the room: its base is fixed to the frame "world". (The
+       original makes this joint "floating" and passive, for a robot that moves; with no
+       position of the robot in the room given, MoveIt treats both the same.) -->
+  <virtual_joint name="world_joint" type="fixed" parent_frame="world" child_link="base"/>
+
+  <!-- Pairs switched off by hand, beyond the original's. With the shoulder all the way
+       down (joint s1 at its limit, where the simulated robot's arms start) the shapes of
+       these two parts overlap in the robot model, and MoveIt would refuse to plan from that
+       posture. On the robot they are separated by one joint and cannot hit each other. -->
+  <disable_collisions link1="left_upper_elbow" link2="left_upper_shoulder" reason="User"/>
+  <disable_collisions link1="right_upper_elbow" link2="right_upper_shoulder" reason="User"/>
+
+  <!-- The robot model has two extra parts per arm that only carry the outer shell
+       ("..._visual"). Their shapes overlap the neighbouring parts of the same arm in
+       ordinary postures (the neutral pose, for one), which the robot plainly can take.
+       They are still checked against the other arm, the head and the body. -->
+  <disable_collisions link1="left_upper_elbow_visual" link2="left_upper_shoulder" reason="User"/>
+  <disable_collisions link1="left_upper_elbow_visual" link2="left_lower_shoulder" reason="User"/>
+  <disable_collisions link1="left_upper_elbow_visual" link2="left_upper_elbow" reason="User"/>
+  <disable_collisions link1="left_upper_elbow_visual" link2="left_lower_elbow" reason="User"/>
+  <disable_collisions link1="left_upper_elbow_visual" link2="left_upper_forearm" reason="User"/>
+  <disable_collisions link1="left_upper_elbow_visual" link2="left_lower_forearm" reason="User"/>
+  <disable_collisions link1="left_upper_elbow_visual" link2="left_wrist" reason="User"/>
+  <disable_collisions link1="left_upper_elbow_visual" link2="left_hand" reason="User"/>
+  <disable_collisions link1="left_upper_elbow_visual" link2="left_upper_forearm_visual" reason="User"/>
+  <disable_collisions link1="left_upper_forearm_visual" link2="left_upper_shoulder" reason="User"/>
+  <disable_collisions link1="left_upper_forearm_visual" link2="left_lower_shoulder" reason="User"/>
+  <disable_collisions link1="left_upper_forearm_visual" link2="left_upper_elbow" reason="User"/>
+  <disable_collisions link1="left_upper_forearm_visual" link2="left_lower_elbow" reason="User"/>
+  <disable_collisions link1="left_upper_forearm_visual" link2="left_upper_forearm" reason="User"/>
+  <disable_collisions link1="left_upper_forearm_visual" link2="left_lower_forearm" reason="User"/>
+  <disable_collisions link1="left_upper_forearm_visual" link2="left_wrist" reason="User"/>
+  <disable_collisions link1="left_upper_forearm_visual" link2="left_hand" reason="User"/>
+  <disable_collisions link1="right_upper_elbow_visual" link2="right_upper_shoulder" reason="User"/>
+  <disable_collisions link1="right_upper_elbow_visual" link2="right_lower_shoulder" reason="User"/>
+  <disable_collisions link1="right_upper_elbow_visual" link2="right_upper_elbow" reason="User"/>
+  <disable_collisions link1="right_upper_elbow_visual" link2="right_lower_elbow" reason="User"/>
+  <disable_collisions link1="right_upper_elbow_visual" link2="right_upper_forearm" reason="User"/>
+  <disable_collisions link1="right_upper_elbow_visual" link2="right_lower_forearm" reason="User"/>
+  <disable_collisions link1="right_upper_elbow_visual" link2="right_wrist" reason="User"/>
+  <disable_collisions link1="right_upper_elbow_visual" link2="right_hand" reason="User"/>
+  <disable_collisions link1="right_upper_elbow_visual" link2="right_upper_forearm_visual" reason="User"/>
+  <disable_collisions link1="right_upper_forearm_visual" link2="right_upper_shoulder" reason="User"/>
+  <disable_collisions link1="right_upper_forearm_visual" link2="right_lower_shoulder" reason="User"/>
+  <disable_collisions link1="right_upper_forearm_visual" link2="right_upper_elbow" reason="User"/>
+  <disable_collisions link1="right_upper_forearm_visual" link2="right_lower_elbow" reason="User"/>
+  <disable_collisions link1="right_upper_forearm_visual" link2="right_upper_forearm" reason="User"/>
+  <disable_collisions link1="right_upper_forearm_visual" link2="right_lower_forearm" reason="User"/>
+  <disable_collisions link1="right_upper_forearm_visual" link2="right_wrist" reason="User"/>
+  <disable_collisions link1="right_upper_forearm_visual" link2="right_hand" reason="User"/>
+
+  <!-- PAIRS -->
+</robot>

@@ -1,0 +1,43 @@
+NOT_INSTALLED MotorControlMsgs/AccelerometerStates          robot=c3111283f75704ebbc88bc06d940c117 local=Cannot locate [MotorControlMsgs/AccelerometerStates]
+NOT_INSTALLED MotorControlMsgs/CollisionDetection           robot=d4ec1db21e202e1147d2e35c83f807df local=Cannot locate [MotorControlMsgs/CollisionDetection]
+NOT_INSTALLED MotorControlMsgs/JointCollisionEstimatorDebug robot=eb061f631143c4641cc418b7601e6e49 local=Cannot locate [MotorControlMsgs/JointCollisionEstimatorDebug]
+NOT_INSTALLED MotorControlMsgs/JointLimits                  robot=0808343db8e3a26125dc8041940510d1 local=Cannot locate [MotorControlMsgs/JointLimits]
+NOT_INSTALLED MotorControlMsgs/LimbState                    robot=087c93147d50537806faa06b6746867e local=Cannot locate [MotorControlMsgs/LimbState]
+NOT_INSTALLED MotorControlMsgs/SonarStates                  robot=b07cb7c6df0435190b26c43fffbc0ae5 local=Cannot locate [MotorControlMsgs/SonarStates]
+NOT_INSTALLED MotorControlMsgs/SpeedConstraint              robot=fbf5cefd3ca9985c428b52e52191a860 local=Cannot locate [MotorControlMsgs/SpeedConstraint]
+NOT_INSTALLED MotorControlMsgs/Stiffness                    robot=c4d10ceda721c2398cf2dc23231adc48 local=Cannot locate [MotorControlMsgs/Stiffness]
+NOT_INSTALLED MotorControlMsgs/StiffnessConstraint          robot=e3a824666502d83bd1ea2680585b6291 local=Cannot locate [MotorControlMsgs/StiffnessConstraint]
+NOT_INSTALLED MotorControlMsgs/StringArray                  robot=cce5a364f3a3be12c9722c6dcad2fa94 local=Cannot locate [MotorControlMsgs/StringArray]
+NOT_INSTALLED MotorControlMsgs/VelocityControllerState      robot=f86578226dfb3c27c4e43740b0e49066 local=Cannot locate [MotorControlMsgs/VelocityControllerState]
+MATCH         actionlib_msgs/GoalStatusArray                robot=8b2b82f13216d0a8ea88bd3af735e619 local=8b2b82f13216d0a8ea88bd3af735e619
+MATCH         baxter_core_msgs/AnalogIOState                robot=39af371963dc9e4447e91f430c720b33 local=39af371963dc9e4447e91f430c720b33
+MATCH         baxter_core_msgs/AnalogIOStates               robot=0a05ba3bbb53a8a3b164e34946d619f7 local=0a05ba3bbb53a8a3b164e34946d619f7
+MATCH         baxter_core_msgs/AssemblyState                robot=356d9dd237ce73b2667da9235f541933 local=356d9dd237ce73b2667da9235f541933
+MATCH         baxter_core_msgs/CollisionAvoidanceState      robot=30f5cb8ae019f1ffe8b599e6d2e589c7 local=30f5cb8ae019f1ffe8b599e6d2e589c7
+MATCH         baxter_core_msgs/CollisionDetectionState      robot=7bde38c182b4d08fdc0635b116f65d04 local=7bde38c182b4d08fdc0635b116f65d04
+MATCH         baxter_core_msgs/DigitalIOState               robot=29d0be3859dae81a66b28f167ecec98c local=29d0be3859dae81a66b28f167ecec98c
+MATCH         baxter_core_msgs/DigitalIOStates              robot=d434210c6ec20947fec667d6c13d6062 local=d434210c6ec20947fec667d6c13d6062
+MATCH         baxter_core_msgs/EndEffectorProperties        robot=21b83773ab9a35216d11e427573c76cc local=21b83773ab9a35216d11e427573c76cc
+MATCH         baxter_core_msgs/EndEffectorState             robot=ade777f069d738595bc19e246b8ec7a0 local=ade777f069d738595bc19e246b8ec7a0
+MATCH         baxter_core_msgs/EndpointState                robot=44bea01d596ff699fa1447bec34167ac local=44bea01d596ff699fa1447bec34167ac
+MATCH         baxter_core_msgs/HeadState                    robot=71c43b264307205358e7e49be5601348 local=71c43b264307205358e7e49be5601348
+NOT_INSTALLED baxter_core_msgs/HomingState                  robot=eacb82bc7d74638daa749d9caab52b99 local=Cannot locate [baxter_core_msgs/HomingState]
+MATCH         baxter_core_msgs/NavigatorState               robot=680d121a1f16a32647298b292492fffd local=680d121a1f16a32647298b292492fffd
+MATCH         baxter_core_msgs/NavigatorStates              robot=2c2eeb02fbbaa6f1ab6c680887f2db78 local=2c2eeb02fbbaa6f1ab6c680887f2db78
+MATCH         baxter_core_msgs/RobustControllerStatus       robot=2f15441b7285d915e7e59d3618e173f2 local=2f15441b7285d915e7e59d3618e173f2
+MATCH         baxter_core_msgs/SEAJointState                robot=d36406dcbb6d860b1b39c4e28f81352b local=d36406dcbb6d860b1b39c4e28f81352b
+MATCH         baxter_core_msgs/URDFConfiguration            robot=0c7028d878027820eed2aa0cbf1f5e4a local=0c7028d878027820eed2aa0cbf1f5e4a
+MATCH         diagnostic_msgs/DiagnosticArray               robot=60810da900de1dd6ddd437c3503511da local=60810da900de1dd6ddd437c3503511da
+MATCH         diagnostic_msgs/DiagnosticStatus              robot=d0ce08bc6e5ba34c7754f563a9cabaf1 local=d0ce08bc6e5ba34c7754f563a9cabaf1
+MATCH         rosgraph_msgs/Log                             robot=acffd30cd6b6de30f120938c17c593fb local=acffd30cd6b6de30f120938c17c593fb
+MATCH         sensor_msgs/Imu                               robot=6a62c6daae103f4ff57a132d6f95cec2 local=6a62c6daae103f4ff57a132d6f95cec2
+MATCH         sensor_msgs/JointState                        robot=3066dcd76a6cfaef579bd0f34173e9fd local=3066dcd76a6cfaef579bd0f34173e9fd
+MATCH         sensor_msgs/PointCloud                        robot=d8e9c3f5afbdd8a130fd1d2763945fca local=d8e9c3f5afbdd8a130fd1d2763945fca
+MATCH         sensor_msgs/Range                             robot=c005c34273dc426c67a020a87bc24148 local=c005c34273dc426c67a020a87bc24148
+MATCH         std_msgs/Bool                                 robot=8b94c1b53db61fb6aed406028ad6332a local=8b94c1b53db61fb6aed406028ad6332a
+MATCH         std_msgs/Float32                              robot=73fcbf46b49191e672908e50842a83d4 local=73fcbf46b49191e672908e50842a83d4
+MATCH         std_msgs/Int32                                robot=da5909fbe378aeaf85e547e830cc1bb7 local=da5909fbe378aeaf85e547e830cc1bb7
+MATCH         std_msgs/String                               robot=992ce8a1687cec8c8bd883ec73ca41d1 local=992ce8a1687cec8c8bd883ec73ca41d1
+MATCH         std_msgs/UInt16                               robot=1df79edf208b629fe6b81923a544552d local=1df79edf208b629fe6b81923a544552d
+MATCH         std_msgs/UInt32                               robot=304a39449588c7f8ce2df6e8001c5fce local=304a39449588c7f8ce2df6e8001c5fce
+NOT_INSTALLED tf2_msgs/TFMessage                            robot=94810edda583a504dfda3829e70d7eec local=Cannot locate [tf2_msgs/TFMessage]

@@ -1,0 +1,30 @@
+# Optional addition to compose.yaml for a bridge machine that is WSL2: lets the RViz and
+# MoveIt containers draw with the computer's graphics card (also a laptop's built-in
+# one) instead of on the processor. See docs/rviz.md.
+#
+# Switch it on with this line in .env:
+#   COMPOSE_FILE=compose.yaml:compose.wsl-gpu.yaml
+#
+# How it works: WSL2 offers the Windows graphics driver to Linux as the device /dev/dxg
+# with libraries in /usr/lib/wsl; Mesa's "d3d12" driver in the container draws through it.
+# Nothing has to be installed. On a machine without /dev/dxg (anything but WSL2) the
+# containers would not start.
+services:
+  rviz:
+    devices:
+      - /dev/dxg
+    volumes:
+      - /usr/lib/wsl:/usr/lib/wsl:ro
+    environment:
+      - LD_LIBRARY_PATH=/usr/lib/wsl/lib
+      - GALLIUM_DRIVER=d3d12
+      - LIBGL_ALWAYS_SOFTWARE=0
+  moveit:
+    devices:
+      - /dev/dxg
+    volumes:
+      - /usr/lib/wsl:/usr/lib/wsl:ro
+    environment:
+      - LD_LIBRARY_PATH=/usr/lib/wsl/lib
+      - GALLIUM_DRIVER=d3d12
+      - LIBGL_ALWAYS_SOFTWARE=0

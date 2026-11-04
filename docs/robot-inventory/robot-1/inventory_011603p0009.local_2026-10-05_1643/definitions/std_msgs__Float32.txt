@@ -1,0 +1,4 @@
+type: std_msgs/Float32
+md5: 73fcbf46b49191e672908e50842a83d4
+
+float32 data

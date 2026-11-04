@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- ROS 2 network settings: nothing changed. Used unless DDS_PROFILE in .env names
+     another file of this folder (see compose.yaml and docs/bridge-machine.md).
+
+     The one entry below is not marked as the default, so no program uses it; it is only
+     here because a settings file without any entry is reported as an error. -->
+<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+  <participant profile_name="unused">
+    <rtps>
+      <name>unused</name>
+    </rtps>
+  </participant>
+</profiles>

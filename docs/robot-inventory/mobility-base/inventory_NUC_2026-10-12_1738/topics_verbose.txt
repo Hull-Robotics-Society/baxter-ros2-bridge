@@ -1,0 +1,43 @@
+
+Published topics:
+ * /mobility_base/wake_time [std_msgs/Time] 1 publisher
+ * /mobility_base/floor_camera/image_proc_rectify_mono/parameter_descriptions [dynamic_reconfigure/ConfigDescription] 1 publisher
+ * /mobility_base/imu/data_raw [sensor_msgs/Imu] 1 publisher
+ * /rosout_agg [rosgraph_msgs/Log] 1 publisher
+ * /mobility_base/bumper_states [mobility_base_core_msgs/BumperState] 1 publisher
+ * /mobility_base/floor_camera/image_color [sensor_msgs/Image] 1 publisher
+ * /mobility_base/floor_camera/image_proc_rectify_mono/parameter_updates [dynamic_reconfigure/Config] 1 publisher
+ * /mobility_base/joystick_raw [mobility_base_core_msgs/JoystickRaw] 1 publisher
+ * /mobility_base/floor_camera/image_rect [sensor_msgs/Image] 1 publisher
+ * /mobility_base/floor_camera/image_proc_debayer/parameter_descriptions [dynamic_reconfigure/ConfigDescription] 1 publisher
+ * /tf_static [tf2_msgs/TFMessage] 1 publisher
+ * /mobility_base/floor_camera/image_proc_debayer/parameter_updates [dynamic_reconfigure/Config] 1 publisher
+ * /mobility_base/wrench [geometry_msgs/WrenchStamped] 1 publisher
+ * /mobility_base/mode [mobility_base_core_msgs/Mode] 1 publisher
+ * /rosout [rosgraph_msgs/Log] 4 publishers
+ * /mobility_base/imu/mag [sensor_msgs/MagneticField] 1 publisher
+ * /mobility_base/floor_camera/camera_info [sensor_msgs/CameraInfo] 1 publisher
+ * /mobility_base/floor_camera/image_mono [sensor_msgs/Image] 1 publisher
+ * /mobility_base/floor_camera/image_proc_rectify_color/parameter_updates [dynamic_reconfigure/Config] 1 publisher
+ * /tf [tf2_msgs/TFMessage] 1 publisher
+ * /mobility_base/bind_status [std_msgs/Bool] 1 publisher
+ * /mobility_base/joint_states [sensor_msgs/JointState] 1 publisher
+ * /mobility_base/floor_camera/image_rect_color [sensor_msgs/Image] 1 publisher
+ * /mobility_base/imu/is_calibrated [std_msgs/Bool] 1 publisher
+ * /mobility_base/floor_camera/image_proc_rectify_color/parameter_descriptions [dynamic_reconfigure/ConfigDescription] 1 publisher
+ * /mobility_base/floor_camera/image_raw [sensor_msgs/Image] 1 publisher
+ * /mobility_base/twist [geometry_msgs/TwistStamped] 1 publisher
+ * /mobility_base/battery [mobility_base_core_msgs/BatteryState] 1 publisher
+ * /mobility_base/joystick [geometry_msgs/TwistStamped] 1 publisher
+
+Subscribed topics:
+ * /mobility_base/set_wake_time [std_msgs/Time] 1 subscriber
+ * /mobility_base/joint_states [sensor_msgs/JointState] 1 subscriber
+ * /mobility_base/bind_stop [std_msgs/Empty] 1 subscriber
+ * /rosout [rosgraph_msgs/Log] 1 subscriber
+ * /mobility_base/cmd_vel_raw [geometry_msgs/Twist] 1 subscriber
+ * /mobility_base/cmd_vel [geometry_msgs/Twist] 1 subscriber
+ * /mobility_base/suppress_wireless [std_msgs/Empty] 1 subscriber
+ * /mobility_base/cmd_relay [std_msgs/Bool] 1 subscriber
+ * /mobility_base/bind_start [std_msgs/Empty] 1 subscriber
+

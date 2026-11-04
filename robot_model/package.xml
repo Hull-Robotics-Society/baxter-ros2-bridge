@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <!-- The name must stay baxter_description: the robot model refers to its 3D shapes as
+       package://baxter_description/meshes/... -->
+  <name>baxter_description</name>
+  <version>1.2.0</version>
+  <description>
+    Baxter's robot model for ROS 2: the model and 3D shapes from Rethink Robotics'
+    baxter_description v1.2.0 (downloaded by fetch_model.sh, not part of this repository),
+    with a launch file that shows the robot's current posture in RViz 2.
+  </description>
+
+  <maintainer email="Techniksam@users.noreply.github.com">Samuel Galla</maintainer>
+  <license>BSD-3-Clause</license>
+  <author>Rethink Robotics Inc. (model and 3D shapes)</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

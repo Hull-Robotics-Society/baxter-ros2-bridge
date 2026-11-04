@@ -1,0 +1,15 @@
+# Kept out of the Docker images and of what "docker compose build" sends to Docker.
+.git
+.env
+.env.*
+**/__pycache__
+**/*.pyc
+**/build
+**/install
+**/log
+robot_check_logs
+sim_check_logs
+docs
+# downloaded inside the rviz image by robot_model/fetch_model.sh
+robot_model/urdf
+robot_model/meshes

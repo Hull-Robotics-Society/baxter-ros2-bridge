@@ -1,0 +1,284 @@
+# Configuration of the bridge between ROS 1 (the robot) and ROS 2.
+#
+# Loaded into the ROS 1 parameter server under /baxter_bridge at start-up (run_bridge.sh).
+#
+# BRIDGE_MODE=fixed_list (the default, see .env.example) uses everything: only what is
+# listed here is bridged. After a change:  docker compose restart bridge
+# BRIDGE_MODE=on_demand uses only robot_info_params at the end of this file: in that mode
+# the bridge finds topics and services by itself.
+#
+#   topics:          bridged in BOTH directions. `type` is the ROS 2 type name.
+#                    `direction: to_robot` marks the topics that carry COMMANDS from
+#                    ROS 2 to the robot. They get a bridge process of their own, so that
+#                    the flood of state messages from the robot (about 60 topics at 100
+#                    messages per second) cannot delay them. Every topic a ROS 2 program
+#                    publishes on needs this mark; without it, its messages arrive late,
+#                    in bursts, or never (found on the robot, 5 Oct 2026).
+#   services_2_to_1: the robot's ROS 1 services, made callable from ROS 2. The name gives
+#                    the direction a REQUEST travels: from a ROS 2 caller to ROS 1.
+#   services_1_to_2: the reverse: ROS 2 services made callable from ROS 1. Not used, and
+#                    dangerous if misused (see the note at that list).
+#   robot_info_params: ROS 1 parameters of the robot passed on to ROS 2 (see the end).
+#
+# Topic and service names are those of robot software 1.2.0, as used by baxter_interface
+# and checked against the robot (docs/robot-inventory/).
+
+topics:
+  # --- Robot information (ROS 1 parameters, published by robot_info.py in the bridge) ----
+  - topic: /baxter_bridge/robot_info
+    type: std_msgs/msg/String
+
+  # --- Robot state and enabling ---------------------------------------------------------
+  - topic: /robot/state
+    type: baxter_core_msgs/msg/AssemblyState
+  - topic: /robot/set_super_enable          # publish true to enable, false to disable
+    type: std_msgs/msg/Bool
+    direction: to_robot
+  - topic: /robot/set_super_reset
+    type: std_msgs/msg/Empty
+    direction: to_robot
+  - topic: /robot/set_super_stop
+    type: std_msgs/msg/Empty
+    direction: to_robot
+
+  # --- Joint states (both arms, head) -----------------------------------------------------
+  - topic: /robot/joint_states
+    type: sensor_msgs/msg/JointState
+
+  # --- Arms -------------------------------------------------------------------------------
+  - topic: /robot/limb/left/joint_command   # position / velocity / torque commands
+    type: baxter_core_msgs/msg/JointCommand
+    direction: to_robot
+  - topic: /robot/limb/right/joint_command
+    type: baxter_core_msgs/msg/JointCommand
+    direction: to_robot
+  - topic: /robot/limb/left/endpoint_state
+    type: baxter_core_msgs/msg/EndpointState
+  - topic: /robot/limb/right/endpoint_state
+    type: baxter_core_msgs/msg/EndpointState
+  - topic: /robot/limb/left/set_speed_ratio
+    type: std_msgs/msg/Float64
+    direction: to_robot
+  - topic: /robot/limb/right/set_speed_ratio
+    type: std_msgs/msg/Float64
+    direction: to_robot
+  - topic: /robot/limb/left/joint_command_timeout
+    type: std_msgs/msg/Float64
+    direction: to_robot
+  - topic: /robot/limb/right/joint_command_timeout
+    type: std_msgs/msg/Float64
+    direction: to_robot
+
+  # --- Joint trajectory action server (tools/joint_trajectory_action_server.py) ------------
+  - topic: /robot/limb/left/inverse_dynamics_command    # feed-forward in position_w_id mode
+    type: trajectory_msgs/msg/JointTrajectoryPoint
+    direction: to_robot
+  - topic: /robot/limb/right/inverse_dynamics_command
+    type: trajectory_msgs/msg/JointTrajectoryPoint
+    direction: to_robot
+  - topic: /robot/joint_state_publish_rate              # how often the robot reports its joints
+    type: std_msgs/msg/UInt16
+    direction: to_robot
+  - topic: /robot/digital_io/left_lower_cuff/state      # True while the arm is held by its cuff
+    type: baxter_core_msgs/msg/DigitalIOState
+  - topic: /robot/digital_io/right_lower_cuff/state
+    type: baxter_core_msgs/msg/DigitalIOState
+
+  # --- Collision avoidance (used by tuck_arms) ----------------------------------------------
+  - topic: /robot/limb/left/collision_avoidance_state
+    type: baxter_core_msgs/msg/CollisionAvoidanceState
+  - topic: /robot/limb/right/collision_avoidance_state
+    type: baxter_core_msgs/msg/CollisionAvoidanceState
+  - topic: /robot/limb/left/suppress_collision_avoidance
+    type: std_msgs/msg/Empty
+    direction: to_robot
+  - topic: /robot/limb/right/suppress_collision_avoidance
+    type: std_msgs/msg/Empty
+    direction: to_robot
+
+  # --- Grippers ---------------------------------------------------------------------------
+  - topic: /robot/end_effector/left_gripper/command
+    type: baxter_core_msgs/msg/EndEffectorCommand
+    direction: to_robot
+  - topic: /robot/end_effector/left_gripper/state
+    type: baxter_core_msgs/msg/EndEffectorState
+  - topic: /robot/end_effector/left_gripper/properties
+    type: baxter_core_msgs/msg/EndEffectorProperties
+  - topic: /robot/end_effector/right_gripper/command
+    type: baxter_core_msgs/msg/EndEffectorCommand
+    direction: to_robot
+  - topic: /robot/end_effector/right_gripper/state
+    type: baxter_core_msgs/msg/EndEffectorState
+  - topic: /robot/end_effector/right_gripper/properties
+    type: baxter_core_msgs/msg/EndEffectorProperties
+
+  # --- Head ------------------------------------------------------------------------------
+  - topic: /robot/head/head_state
+    type: baxter_core_msgs/msg/HeadState
+  - topic: /robot/head/command_head_pan
+    type: baxter_core_msgs/msg/HeadPanCommand
+    direction: to_robot
+  - topic: /robot/head/command_head_nod
+    type: std_msgs/msg/Bool
+    direction: to_robot
+
+  # --- Navigators (wheel + buttons) and their lights ------------------------------------
+  - topic: /robot/navigators/left_navigator/state
+    type: baxter_core_msgs/msg/NavigatorState
+  - topic: /robot/navigators/right_navigator/state
+    type: baxter_core_msgs/msg/NavigatorState
+  - topic: /robot/navigators/torso_left_navigator/state
+    type: baxter_core_msgs/msg/NavigatorState
+  - topic: /robot/navigators/torso_right_navigator/state
+    type: baxter_core_msgs/msg/NavigatorState
+  - topic: /robot/digital_io/left_inner_light/state
+    type: baxter_core_msgs/msg/DigitalIOState
+  - topic: /robot/digital_io/left_outer_light/state
+    type: baxter_core_msgs/msg/DigitalIOState
+  - topic: /robot/digital_io/right_inner_light/state
+    type: baxter_core_msgs/msg/DigitalIOState
+  - topic: /robot/digital_io/right_outer_light/state
+    type: baxter_core_msgs/msg/DigitalIOState
+  - topic: /robot/digital_io/torso_left_inner_light/state
+    type: baxter_core_msgs/msg/DigitalIOState
+  - topic: /robot/digital_io/torso_left_outer_light/state
+    type: baxter_core_msgs/msg/DigitalIOState
+  - topic: /robot/digital_io/torso_right_inner_light/state
+    type: baxter_core_msgs/msg/DigitalIOState
+  - topic: /robot/digital_io/torso_right_outer_light/state
+    type: baxter_core_msgs/msg/DigitalIOState
+
+  # --- Digital and analog I/O commands (shared by all components) -----------------------
+  - topic: /robot/digital_io/command
+    type: baxter_core_msgs/msg/DigitalOutputCommand
+    direction: to_robot
+  - topic: /robot/analog_io/command
+    type: baxter_core_msgs/msg/AnalogOutputCommand
+    direction: to_robot
+  # Each other I/O component (cuff buttons, suction valves, torso fan, ...) has its own
+  # state topic: /robot/digital_io/<id>/state (DigitalIOState) or
+  # /robot/analog_io/<id>/state (AnalogIOState). Add the ones the lab needs, with ids
+  # from the robot inventory (topics.txt).
+
+  # --- Sensors (Sonar, RangeSensor, Accelerometer) -----------------------------------------
+  - topic: /robot/sonar/head_sonar/state
+    type: sensor_msgs/msg/PointCloud
+  - topic: /robot/range/left_hand_range/state
+    type: sensor_msgs/msg/Range
+  - topic: /robot/range/right_hand_range/state
+    type: sensor_msgs/msg/Range
+  - topic: /robot/accelerometer/left_accelerometer/state
+    type: sensor_msgs/msg/Imu
+  - topic: /robot/accelerometer/right_accelerometer/state
+    type: sensor_msgs/msg/Imu
+
+  # --- Lights on the head (HeadLights): the halo and the sonar lights ----------------------
+  - topic: /robot/sonar/head_sonar/lights/state
+    type: std_msgs/msg/UInt16
+  - topic: /robot/sonar/head_sonar/lights/red_level
+    type: std_msgs/msg/Float32
+  - topic: /robot/sonar/head_sonar/lights/green_level
+    type: std_msgs/msg/Float32
+  - topic: /robot/sonar/head_sonar/lights/set_lights
+    type: std_msgs/msg/UInt16
+    direction: to_robot
+  - topic: /robot/sonar/head_sonar/lights/set_red_level
+    type: std_msgs/msg/Float32
+    direction: to_robot
+  - topic: /robot/sonar/head_sonar/lights/set_green_level
+    type: std_msgs/msg/Float32
+    direction: to_robot
+
+  # --- Screen and I/O overview (smoke_test: Head, Cameras, Messages) ----------------------
+  - topic: /robot/xdisplay                  # images shown on Baxter's screen, 1024 x 600
+    type: sensor_msgs/msg/Image
+    direction: to_robot
+  - topic: /robot/analog_io_states
+    type: baxter_core_msgs/msg/AnalogIOStates
+
+  # --- Maintenance routines (calibrate_arm, tare); real robot only ------------------------
+  - topic: /robustcontroller/left/CalibrateArm/enable
+    type: baxter_maintenance_msgs/msg/CalibrateArmEnable
+    direction: to_robot
+  - topic: /robustcontroller/left/CalibrateArm/status
+    type: baxter_core_msgs/msg/RobustControllerStatus
+  - topic: /robustcontroller/left/Tare/enable
+    type: baxter_maintenance_msgs/msg/TareEnable
+    direction: to_robot
+  - topic: /robustcontroller/left/Tare/status
+    type: baxter_core_msgs/msg/RobustControllerStatus
+  - topic: /robustcontroller/right/CalibrateArm/enable
+    type: baxter_maintenance_msgs/msg/CalibrateArmEnable
+    direction: to_robot
+  - topic: /robustcontroller/right/CalibrateArm/status
+    type: baxter_core_msgs/msg/RobustControllerStatus
+  - topic: /robustcontroller/right/Tare/enable
+    type: baxter_maintenance_msgs/msg/TareEnable
+    direction: to_robot
+  - topic: /robustcontroller/right/Tare/status
+    type: baxter_core_msgs/msg/RobustControllerStatus
+
+  # --- Camera info: small, sent with every frame of an open camera. camera_control -l and
+  #     camera_status() listen to it to tell which cameras are open. ---------------------
+  - topic: /cameras/head_camera/camera_info
+    type: sensor_msgs/msg/CameraInfo
+  - topic: /cameras/left_hand_camera/camera_info
+    type: sensor_msgs/msg/CameraInfo
+  - topic: /cameras/right_hand_camera/camera_info
+    type: sensor_msgs/msg/CameraInfo
+
+  # --- Camera images (Camera class, smoke_test -t Cameras) -------------------------------
+  # These are by far the largest messages: 640 x 400 at 25 pictures per second is about
+  # 25 MB/s per camera, and the bridge fetches the pictures of every OPEN camera from the
+  # robot all the time, whether or not a ROS 2 program wants them. If that slows the
+  # network down, remove the cameras the lab doesn't use here, or close them on the robot
+  # (camera_control -c NAME).
+  # queue_size 1: when pictures arrive faster than they can be passed on, old ones are
+  # dropped instead of queued (the default queue of 100 would mean seconds of delay).
+  - topic: /cameras/head_camera/image
+    type: sensor_msgs/msg/Image
+    queue_size: 1
+  - topic: /cameras/left_hand_camera/image
+    type: sensor_msgs/msg/Image
+    queue_size: 1
+  - topic: /cameras/right_hand_camera/image
+    type: sensor_msgs/msg/Image
+    queue_size: 1
+
+# The robot's ROS 1 services that ROS 2 programs can call. `type` is the ROS 1 type name
+# (no /srv/ in it). At start-up, run_bridge.sh drops the ones the ROS 1 side doesn't
+# provide, and says so in the log.
+services_2_to_1:
+  # --- Cameras -----------------------------------------------------------------------------
+  - service: /cameras/list
+    type: baxter_core_msgs/ListCameras
+  - service: /cameras/open
+    type: baxter_core_msgs/OpenCamera
+  - service: /cameras/close
+    type: baxter_core_msgs/CloseCamera
+  - service: /cameras/reset                 # re-enumerate cameras (camera_control -e)
+    type: std_srvs/Empty
+  # --- Inverse kinematics ------------------------------------------------------------------
+  - service: /ExternalTools/left/PositionKinematicsNode/IKService
+    type: baxter_core_msgs/SolvePositionIK
+  - service: /ExternalTools/right/PositionKinematicsNode/IKService
+    type: baxter_core_msgs/SolvePositionIK
+  # --- The bridge's own check -----------------------------------------------------------------
+  # Not on the robot: offered inside the bridge container (robot_info.py) and called
+  # through the bridge by bridge_guard.py, to notice a bridge that has stopped answering.
+  - service: /baxter_bridge/ping
+    type: std_srvs/Empty
+
+# DANGER: never list one of the robot's own services here. This direction makes the bridge
+# register the service on the ROS 1 master itself, which REPLACES the robot's real one for
+# every ROS 1 program until the bridge stops. Only for services that ROS 2 nodes provide.
+services_1_to_2: []
+
+# ROS 1 parameters of the robot that are passed on to ROS 2, on /baxter_bridge/robot_info.
+# Read them in ROS 2 with baxter_interface.robot_info(). A name can be a single parameter
+# or a namespace (everything below it). Parameters the robot doesn't have are reported as
+# missing, so listing one that might not exist does no harm.
+robot_info_params:
+  - /rethink          # Rethink's own parameters, among them software_version
+  - /rosdistro        # the ROS 1 version the robot runs (indigo)
+  - /rosversion

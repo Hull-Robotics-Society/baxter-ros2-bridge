@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+<!-- Baxter with Rethink's electric gripper on one arm or on both: Rethink's own parts
+     (baxter_description and rethink_ee_description of baxter_common v1.2.0, fetched by
+     fetch_model.sh), put together as Rethink's urdf/baxter.urdf.xacro does, but with a
+     choice per arm. An arm without the electric gripper ends as in Rethink's "no gripper"
+     (null_gripper): the hand tip at the mounting plate.
+
+       xacro baxter_grippers.urdf.xacro left_electric_gripper:=true right_electric_gripper:=true
+
+     The fingers are Rethink's choice for its own model (as in urdf/left_end_effector.urdf.xacro):
+     extended narrow fingers in slot 2 with paddle tips, gripping from the inside. Other
+     fingers: finger:=standard_narrow and so on, from urdf/rethink_ee/electric_gripper/fingers.
+     Both grippers get the same fingers.
+
+     Without any gripper, baxter_moveit_config uses urdf/baxter.urdf instead, the model it
+     was first tested with. -->
+<robot name="baxter" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="left_electric_gripper" default="false"/>
+  <xacro:arg name="right_electric_gripper" default="false"/>
+  <xacro:arg name="finger" default="extended_narrow"/>
+  <xacro:arg name="finger_slot" default="2"/>
+  <xacro:arg name="finger_tip" default="paddle_tip"/>
+  <xacro:arg name="finger_grasp" default="inner"/>
+  <xacro:arg name="gazebo" default="false"/>
+
+  <xacro:include filename="$(find baxter_description)/urdf/baxter_base/baxter_base.urdf.xacro"/>
+  <xacro:include filename="$(find baxter_description)/urdf/pedestal/pedestal.xacro"/>
+  <xacro:include filename="$(find baxter_description)/urdf/rethink_ee/electric_gripper/rethink_electric_gripper.xacro"/>
+  <xacro:include filename="$(find baxter_description)/urdf/rethink_ee/null_gripper/null_gripper.xacro"/>
+
+  <xacro:macro name="hand_end" params="side electric">
+    <xacro:if value="${electric}">
+      <xacro:rethink_electric_gripper side="${side}"
+          l_finger="$(arg finger)" l_finger_slot="$(arg finger_slot)"
+          l_finger_tip="$(arg finger_tip)" l_finger_grasp="$(arg finger_grasp)"
+          r_finger="$(arg finger)" r_finger_slot="$(arg finger_slot)"
+          r_finger_tip="$(arg finger_tip)" r_finger_grasp="$(arg finger_grasp)"/>
+    </xacro:if>
+    <xacro:unless value="${electric}">
+      <xacro:null_gripper side="${side}"/>
+    </xacro:unless>
+  </xacro:macro>
+
+  <xacro:hand_end side="left" electric="$(arg left_electric_gripper)"/>
+  <xacro:hand_end side="right" electric="$(arg right_electric_gripper)"/>
+</robot>

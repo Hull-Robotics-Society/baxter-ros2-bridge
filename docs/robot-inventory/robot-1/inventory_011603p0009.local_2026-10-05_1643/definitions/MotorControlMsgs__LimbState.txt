@@ -1,0 +1,6 @@
+type: MotorControlMsgs/LimbState
+md5: 087c93147d50537806faa06b6746867e
+
+bool enabled
+bool interaction_reflex_active
+uint8 faults

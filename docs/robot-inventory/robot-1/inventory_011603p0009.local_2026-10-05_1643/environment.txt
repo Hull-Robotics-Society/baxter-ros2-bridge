@@ -1,0 +1,5 @@
+date:           2026-10-05T16:43:55+00:00
+ROS_MASTER_URI: http://011603p0009.local:11311
+ROS_IP:         169.254.88.57  ROS_HOSTNAME: 
+local ROS:      noetic (noetic)
+local host:     bridge-dev

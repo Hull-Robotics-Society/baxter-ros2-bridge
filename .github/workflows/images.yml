@@ -1,0 +1,77 @@
+# Builds the Docker images and publishes them on the GitHub Container Registry
+# (ghcr.io/<owner>/baxter-<name>), so that a machine can use them with
+#   docker compose pull bridge
+# instead of building them itself (the bridge takes 30-60 min).
+#
+# It runs for a release tag (v1.0.0 gives the images the tag 1.0.0, the version that
+# release's compose.yaml names) and when started by hand (GitHub -> Actions -> images ->
+# Run workflow), which tags the images with the branch name. Pushes to a branch build
+# nothing. Every run also adds the tag sha-<commit>, and a release also 'latest'
+# (metadata-action does that by itself for the newest version tag).
+# A new package on ghcr.io starts private: set it to public once in its settings
+# (GitHub -> Packages -> the package -> Package settings -> Change visibility).
+
+name: images
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [bridge-jazzy, client-jazzy, moveit-jazzy, rviz-jazzy, noetic]
+    steps:
+      - uses: actions/checkout@v4
+
+      # The runner has about 14 GB free; the MoveIt image alone is 4 GB, and the build
+      # needs room for its layers too.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          docker system prune -af
+          df -h /
+
+      - name: Image name
+        id: name
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/baxter-${{ matrix.image }}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ${{ steps.name.outputs.image }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=sha-
+            type=semver,pattern={{version}}
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/${{ matrix.image }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # ros1_bridge needs about 2 GB per compile job. GitHub's runner has 7 GB for a
+          # private repository and 16 GB for a public one.
+          build-args: |
+            BUILD_JOBS=${{ github.event.repository.private && '2' || '4' }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}

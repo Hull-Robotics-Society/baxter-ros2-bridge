@@ -1,0 +1,6 @@
+type: baxter_core_msgs/AnalogIOState
+md5: 39af371963dc9e4447e91f430c720b33
+
+time timestamp
+float64 value
+bool isInputOnly

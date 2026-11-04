@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>baxter_interface</name>
+  <version>1.0.0</version>
+  <description>
+    Python interface to the Baxter robot for ROS 2, through the ROS 1 to ROS 2 bridge.
+    Same classes and methods as the original Baxter SDK (baxter_interface v0.7.0).
+  </description>
+
+  <maintainer email="Techniksam@users.noreply.github.com">Samuel Galla</maintainer>
+  <license>BSD-3-Clause</license>
+  <author>Rethink Robotics Inc. (original ROS 1 version)</author>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>baxter_core_msgs</exec_depend>
+  <exec_depend>baxter_maintenance_msgs</exec_depend>
+  <exec_depend>mobility_base_core_msgs</exec_depend>
+  <!-- The joint trajectory action server (tools/joint_trajectory_action_server.py). -->
+  <exec_depend>control_msgs</exec_depend>
+  <exec_depend>trajectory_msgs</exec_depend>
+  <!-- Pictures (Camera, Display): OpenCV, and cv_bridge to convert ROS image messages. -->
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

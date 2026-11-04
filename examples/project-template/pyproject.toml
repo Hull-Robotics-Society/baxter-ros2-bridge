@@ -1,0 +1,19 @@
+[project]
+name = "my-project"
+version = "0.1.0"
+description = "A project for the Baxter robot"
+requires-python = ">=3.12"
+
+# Tests live in tests/ and import the package from src/.
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+# Formatting and linting (the Ruff extension in VS Code reads this).
+[tool.ruff]
+line-length = 100
+
+# Type checking (Pylance in VS Code reads this). "basic" reports wrong argument counts,
+# misspelled attributes and forgotten None checks in your own code.
+[tool.pyright]
+typeCheckingMode = "basic"

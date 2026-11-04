@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.bag binary
+*.png binary
+*.ova binary
+# Rethink's original MoveIt configuration, kept for comparison: not counted in GitHub's
+# language statistics (its two generated IKFast solvers are 5 MB of C++).
+moveit_config/reference/** linguist-vendored

@@ -1,0 +1,4 @@
+type: MotorControlMsgs/StringArray
+md5: cce5a364f3a3be12c9722c6dcad2fa94
+
+string[] data

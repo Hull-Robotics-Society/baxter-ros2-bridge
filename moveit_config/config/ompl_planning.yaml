@@ -1,0 +1,43 @@
+# The planner. The first three entries are MoveIt 2's own defaults (moveit_configs_utils'
+# ompl_planning.yaml; MoveIt's list of planners is added from its ompl_defaults.yaml).
+# The per-group settings below are those of the configuration Rethink Robotics and MoveIt
+# shipped for Baxter (reference/moveit_robots_baxter, ompl_planning.yaml): RRTConnect,
+# and how the planner measures progress (the two shoulder joints; for both arms the
+# right arm's, as there). The original's lists of planners per group are MoveIt 2's own
+# list here (its names have no "kConfigDefault"); every planner of the original is in it.
+#
+# One value is NOT the original's: how finely a path is checked for collisions,
+# longest_valid_segment_fraction. The original has 0.05; here it is 0.005, MoveIt 2's own
+# default. With 0.05 the checks are so far apart that the planner found paths straight
+# through a 2 cm and a 10 cm thick wall (simulated robot, 20 Oct 2026); MoveIt 2 then
+# refuses them, so no path was found at all. MoveIt 1, for which the original was made,
+# had no such final check and would have run them. With 0.005 both walls were passed
+# around (docs/moveit.md, "The original configuration").
+planning_plugins:
+  - ompl_interface/OMPLPlanner
+request_adapters:
+  - default_planning_request_adapters/ResolveConstraintFrames
+  - default_planning_request_adapters/ValidateWorkspaceBounds
+  - default_planning_request_adapters/CheckStartStateBounds
+  - default_planning_request_adapters/CheckStartStateCollision
+response_adapters:
+  - default_planning_response_adapters/AddTimeOptimalParameterization
+  - default_planning_response_adapters/ValidateSolution
+  - default_planning_response_adapters/DisplayMotionPath
+
+left_arm:
+  default_planner_config: RRTConnect
+  projection_evaluator: joints(left_s0,left_s1)
+  longest_valid_segment_fraction: 0.005
+right_arm:
+  default_planner_config: RRTConnect
+  projection_evaluator: joints(right_s0,right_s1)
+  longest_valid_segment_fraction: 0.005
+both_arms:
+  default_planner_config: RRTConnect
+  projection_evaluator: joints(right_s0,right_s1)
+  longest_valid_segment_fraction: 0.005
+left_hand:
+  default_planner_config: RRTConnect
+right_hand:
+  default_planner_config: RRTConnect

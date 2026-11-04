@@ -1,0 +1,57 @@
+// How VS Code starts the container this project is edited and run in.
+// (This file may contain comments; VS Code reads it as "JSON with comments".)
+{
+  "name": "Baxter project",
+
+  // The container is built from .devcontainer/Dockerfile: the bridge repository's client
+  // image (ROS 2, Baxter's messages, baxter_interface) plus this project's extra packages.
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+
+  // On the same network as the bridge, as "docker compose run client" is.
+  "runArgs": ["--network=host", "--ipc=host"],
+
+  "containerEnv": {
+    // Must be the bridge's ROS_DOMAIN_ID (its .env; 42 unless changed).
+    "ROS_DOMAIN_ID": "42",
+    // ROS 2 network settings, a file of the bridge repository's bridge_config/dds/:
+    // wsl.xml when the bridge runs in WSL2, default.xml on a normal Linux machine.
+    "FASTRTPS_DEFAULT_PROFILES_FILE": "/config/dds/wsl.xml"
+    // Only with several robots: add a line "BAXTER_ROBOT": "one" (and a comma above) to
+    // make this project's programs work with the robot of that name.
+  },
+
+  // The folder with those settings files. Change the path if the bridge repository is
+  // not in ~/baxter-ros2-bridge.
+  "mounts": [
+    "source=${localEnv:HOME}/baxter-ros2-bridge/bridge_config/dds,target=/config/dds,type=bind,readonly",
+    // The time zone of the machine, so that clocks in your programs show local time.
+    "source=/etc/localtime,target=/etc/localtime,type=bind,readonly"
+  ],
+
+  // Makes this project's src/ folder importable everywhere in the container
+  // (from my_project import ...), also for the Run button, the debugger and the tests.
+  "postCreateCommand": "mkdir -p /usr/local/lib/python3.12/dist-packages && echo ${containerWorkspaceFolder}/src > /usr/local/lib/python3.12/dist-packages/project.pth",
+
+  "customizations": {
+    "vscode": {
+      // Installed inside the container: Python support, type checking and completion
+      // (Pylance), formatting and linting (Ruff).
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/bin/python3",
+        "python.analysis.typeCheckingMode": "basic",
+        "python.testing.pytestEnabled": true,
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff"
+        }
+      }
+    }
+  }
+}

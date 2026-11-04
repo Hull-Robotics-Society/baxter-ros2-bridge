@@ -1,0 +1,47 @@
+# A second planner, CHOMP, chosen at the start with planner:=chomp (moveit.launch.py); OMPL
+# stays the default. CHOMP starts from a straight line between start and goal and bends
+# it away from obstacles, which gives smooth paths but finds no way around large ones.
+#
+# The values are those of the configuration Rethink Robotics and MoveIt shipped for
+# Baxter (reference/moveit_robots_baxter, chomp_planning.yaml), under MoveIt 2's names.
+# Differences:
+#   - collision_clearence there (MoveIt 1's spelling) is collision_clearance here.
+#   - pseudo_inverse_ridge_factor written 1.0e-4 instead of 1e-4 (the same value): the
+#     launch file's YAML reader takes 1e-4 for text, and MoveIt 2.15 (Lyrical) stops with
+#     "expected [double] got [string]".
+#   - Not in MoveIt 2, so left out: animate_path, add_randomness, hmc_discretization,
+#     hmc_stochasticity, hmc_annealing_factor, use_hamiltonian_monte_carlo,
+#     animate_endeffector, animate_endeffector_segment, random_jump_amount.
+#   - The plugin and adapters are MoveIt 2's own (moveit_configs_utils' chomp_planning.yaml);
+#     the original's adapters (FixStartState...) no longer exist.
+planning_plugins:
+  - chomp_interface/CHOMPPlanner
+request_adapters:
+  - default_planning_request_adapters/ResolveConstraintFrames
+  - default_planning_request_adapters/ValidateWorkspaceBounds
+  - default_planning_request_adapters/CheckStartStateBounds
+  - default_planning_request_adapters/CheckStartStateCollision
+response_adapters:
+  - default_planning_response_adapters/AddTimeOptimalParameterization
+  - default_planning_response_adapters/ValidateSolution
+  - default_planning_response_adapters/DisplayMotionPath
+
+planning_time_limit: 50.0
+max_iterations: 200
+max_iterations_after_collision_free: 5
+smoothness_cost_weight: 0.1
+obstacle_cost_weight: 1.0
+learning_rate: 0.01
+smoothness_cost_velocity: 0.0
+smoothness_cost_acceleration: 1.0
+smoothness_cost_jerk: 0.0
+ridge_factor: 0.0
+use_pseudo_inverse: false
+pseudo_inverse_ridge_factor: 1.0e-4
+joint_update_limit: 0.1
+collision_clearance: 0.2
+collision_threshold: 0.07
+use_stochastic_descent: true
+enable_failure_recovery: false
+max_recovery_attempts: 5
+trajectory_initialization_method: "quintic-spline"

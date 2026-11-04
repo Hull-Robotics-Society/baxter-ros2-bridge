@@ -1,0 +1,22 @@
+Baxter inventory, Mon Oct 12 17:33:07 BST 2026
+ROS master:        http://011602p0013.local:11311
+Software version:  1.2.0.57
+Nodes / topics / services: 23 / 271 / 89
+Checksums vs. this machine's messages:
+  MATCH: 29
+  DIFFERENT: 0
+  NOT_INSTALLED: 13
+Baxter / Mobility Base types that DIFFER:
+Not checked (no messages during the recording; verify by commanding the robot):
+  32 types, of which Baxter / Mobility Base:
+    baxter_core_msgs/AnalogOutputCommand
+    baxter_core_msgs/DigitalOutputCommand
+    baxter_core_msgs/EndEffectorCommand
+    baxter_core_msgs/HeadPanCommand
+    baxter_core_msgs/HomingCommand
+    baxter_core_msgs/JointCommand
+    baxter_maintenance_msgs/CalibrateArmEnable
+    baxter_maintenance_msgs/TareEnable
+Mobility Base topics: 0 (see mobility_base.txt)
+Machines the nodes run on: 1
+  011602p0013.local: 23 nodes, e.g. /PositionKinematicsNode_left; reachable (169.254.4.48)

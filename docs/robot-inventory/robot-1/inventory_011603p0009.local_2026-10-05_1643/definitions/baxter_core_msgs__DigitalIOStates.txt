@@ -1,0 +1,14 @@
+type: baxter_core_msgs/DigitalIOStates
+md5: d434210c6ec20947fec667d6c13d6062
+
+string[]         names
+DigitalIOState[] states
+================================================================================
+MSG: baxter_core_msgs/DigitalIOState
+int8 state
+bool isInputOnly
+
+int8 OFF = 0
+int8 ON  = 1
+int8 PRESSED = 1
+int8 UNPRESSED = 0

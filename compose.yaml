@@ -1,0 +1,213 @@
+# Starts the bridge (and, for testing, a ROS 2 client) with one command.
+#
+#   cp .env.example .env              # once; then fill in the addresses
+#   docker compose build bridge       # 30-60 min the first time
+#   docker compose up bridge          # start the bridge (Ctrl+C to stop)
+#   bash scripts/robot_check.sh       # checks everything against the robot, stage by stage
+#
+# Settings come from .env (not committed: it holds this machine's addresses); copy
+# .env.example and fill it in. The image tag is the release of this repository (1.0.0);
+# each release names its own, so a checkout always gets the images that belong to it.
+#
+# Ready-made images: GitHub builds them (.github/workflows/images.yml) and publishes them
+# under BAXTER_IMAGES (default ghcr.io/hull-robotics-society), so instead of building:
+#   docker compose pull bridge
+# 'docker compose build' still works and gives the local images the same names.
+
+services:
+  bridge:
+    build:
+      context: .
+      dockerfile: docker/bridge-jazzy/Dockerfile
+    image: ${BAXTER_IMAGES:-ghcr.io/hull-robotics-society}/baxter-bridge-jazzy:1.0.0
+    # ROS 1 needs direct connections in both directions; ROS 2 discovery uses multicast.
+    # Both work most simply when the container shares the host's network.
+    network_mode: host
+    # Lets ROS 2 (Fast DDS) use shared memory between containers on the same machine.
+    # Without it, containers find each other but data may not arrive.
+    ipc: host
+    environment:
+      - ROS_MASTER_URI=${ROS_MASTER_URI}
+      - ROS_IP=${ROS_IP}
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-42}
+      # How far ROS 2 looks for other programs: SUBNET (ROS 2's default) is the local
+      # network; LOCALHOST is this machine only, so lab machines on one network do not see
+      # each other's bridges (docs/lab-machines.md). Also set it in your own shell.
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=${ROS_AUTOMATIC_DISCOVERY_RANGE:-SUBNET}
+      # fixed_list: only what bridge_config/topics.yaml lists, all the time; the mode to work in.
+      # on_demand: everything on the robot is reachable, carried only while in use; pauses
+      # all data once per second on the real robot. See docker/bridge-jazzy/README.md.
+      - BRIDGE_MODE=${BRIDGE_MODE:-fixed_list}
+      # 0 switches off the guard that restarts a bridge process which waits for good for
+      # a robot service that does not answer (docker/bridge-jazzy/bridge_guard.py).
+      - BRIDGE_GUARD=${BRIDGE_GUARD:-1}
+      # Only with several robots: this robot's name (docs/two-robots.md).
+      - ROBOT_NAME=${ROBOT_NAME:-}
+      - ROBOT_POSITION=${ROBOT_POSITION:-0 0 0 0}
+      # Which list the bridge carries, and the name of its helpers. Only set for a second
+      # ROS 1 system next to the robot, such as the Mobility Base (.env.base.example).
+      - BRIDGE_CONFIG=${BRIDGE_CONFIG:-/config/topics.yaml}
+      - BRIDGE_PARAM_NS=${BRIDGE_PARAM_NS:-/baxter_bridge}
+      # ROS 2 network settings file from bridge_config/dds/: "default" changes nothing,
+      # "wsl" is needed when the bridge machine is WSL2 (see docs/bridge-machine.md).
+      - FASTRTPS_DEFAULT_PROFILES_FILE=/config/dds/${DDS_PROFILE:-default}.xml
+    # ROS 1 programs announce themselves by host name, and containers cannot look up the
+    # robot's .local name. This makes the name from .env resolve inside the container.
+    # (Without ROBOT_HOSTNAME in .env the entry is a harmless placeholder.)
+    extra_hosts:
+      - "${ROBOT_HOSTNAME:-robot.invalid}:${ROBOT_IP:-127.0.0.1}"
+      # A second name for the same robot: its programs may announce themselves under
+      # another name than the one in ROS_MASTER_URI (e.g. <serial>.local).
+      - "${ROBOT_HOSTNAME_2:-robot2.invalid}:${ROBOT_IP:-127.0.0.1}"
+      # A second computer whose programs are part of the robot's ROS 1 system, such as the
+      # Mobility Base's own one (BASE_HOSTNAME and BASE_IP in .env).
+      - "${BASE_HOSTNAME:-base.invalid}:${BASE_IP:-127.0.0.1}"
+    volumes:
+      - ./bridge_config:/config:ro    # the configuration; edit it without rebuilding the image
+    # If the bridge container stops by itself, start it again. (A bridge process that stops
+    # because a ROS 1 service failed to answer is already restarted inside the container.)
+    # It does not restart after a normal stop (Ctrl+C, docker compose stop).
+    restart: on-failure
+
+  # Runs programs for the robot (ROS 2 Jazzy, Baxter's messages and the Python library):
+  #   docker compose run --rm client python3 examples/01_read_robot.py
+  #   docker compose run --rm client            # a shell
+  client:
+    build:
+      context: .
+      dockerfile: docker/client-jazzy/Dockerfile
+    image: ${BAXTER_IMAGES:-ghcr.io/hull-robotics-society}/baxter-client-jazzy:1.0.0
+    network_mode: host
+    ipc: host
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-42}
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=${ROS_AUTOMATIC_DISCOVERY_RANGE:-SUBNET}
+      - FASTRTPS_DEFAULT_PROFILES_FILE=/config/dds/${DDS_PROFILE:-default}.xml
+      # Only with several robots: the name of the robot the programs started here are
+      # for, taken from the settings file (--env-file .env.one). See docs/two-robots.md.
+      - BAXTER_ROBOT=${ROBOT_NAME:-}
+    volumes:
+      - ./bridge_config/dds:/config/dds:ro
+      # The time zone of this machine. Without it programs in the container run on world
+      # time (UTC), and a clock they show, on the robot's screen for example, is off.
+      - /etc/localtime:/etc/localtime:ro
+      # The folder your programs are in, as /project. Without PROJECT_DIR in .env that is
+      # this repository, so 'python3 examples/01_read_robot.py' works.
+      - ${PROJECT_DIR:-.}:/project
+      - ./examples:/examples
+    working_dir: /project
+    profiles: ["tools"]               # not started by 'docker compose up'
+
+  # Working on the Python library itself (baxter_interface_ros2/):
+  #   docker compose run --rm dev
+  # The library folder is mounted from the repository over the copy in the image, so edits
+  # in VS Code take effect in the container at once. Build again inside only after adding
+  # a command-line tool: colcon build --symlink-install && source install/setup.bash
+  dev:
+    image: ${BAXTER_IMAGES:-ghcr.io/hull-robotics-society}/baxter-client-jazzy:1.0.0   # built by 'docker compose build client'
+    network_mode: host
+    ipc: host
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-42}
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=${ROS_AUTOMATIC_DISCOVERY_RANGE:-SUBNET}
+      - FASTRTPS_DEFAULT_PROFILES_FILE=/config/dds/${DDS_PROFILE:-default}.xml
+      - BAXTER_ROBOT=${ROBOT_NAME:-}
+    volumes:
+      - ./bridge_config/dds:/config/dds:ro
+      - /etc/localtime:/etc/localtime:ro
+      - ./baxter_interface_ros2:/opt/baxter/lib_ws/src/baxter_interface_ros2
+      - ./examples:/examples
+    working_dir: /opt/baxter/lib_ws
+    command: ["bash"]
+    profiles: ["tools"]
+
+  # The robot's current posture in 3D (RViz 2 with Baxter's robot model); see docs/rviz.md:
+  #   xhost +local:docker             # once per login: lets the container open a window
+  #   docker compose run --rm rviz
+  # Needs a machine with a screen (the window opens on the machine Docker runs on).
+  rviz:
+    build:
+      context: .
+      dockerfile: docker/rviz-jazzy/Dockerfile
+    image: ${BAXTER_IMAGES:-ghcr.io/hull-robotics-society}/baxter-rviz-jazzy:1.0.0
+    network_mode: host
+    ipc: host
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-42}
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=${ROS_AUTOMATIC_DISCOVERY_RANGE:-SUBNET}
+      - FASTRTPS_DEFAULT_PROFILES_FILE=/config/dds/${DDS_PROFILE:-default}.xml
+      # Only with several robots: the robot that "docker compose run rviz" shows.
+      - BAXTER_ROBOT=${ROBOT_NAME:-}
+      - DISPLAY=${DISPLAY:-:0}
+      # Draw without the graphics card's own driver; slower, but works in a VM.
+      - LIBGL_ALWAYS_SOFTWARE=${RVIZ_SOFTWARE_RENDERING:-1}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix    # the screen of the machine Docker runs on
+      - ./bridge_config/dds:/config/dds:ro
+    profiles: ["tools"]
+
+  # MoveIt 2: plans arm motions that avoid collisions and runs them on the robot; see
+  # docs/moveit.md. Opens RViz with the motion planning panel (needs a screen, as rviz):
+  #   docker compose run --rm moveit
+  # Without the window, for programs that use baxter_interface.planning:
+  #   docker compose run --rm moveit ros2 launch baxter_moveit_config moveit.launch.py rviz:=false
+  moveit:
+    build:
+      context: .
+      dockerfile: docker/moveit-jazzy/Dockerfile
+    image: ${BAXTER_IMAGES:-ghcr.io/hull-robotics-society}/baxter-moveit-jazzy:1.0.0
+    network_mode: host
+    ipc: host
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-42}
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=${ROS_AUTOMATIC_DISCOVERY_RANGE:-SUBNET}
+      - FASTRTPS_DEFAULT_PROFILES_FILE=/config/dds/${DDS_PROFILE:-default}.xml
+      # Only with several robots: the robot MoveIt and the programs started here are for.
+      - BAXTER_ROBOT=${ROBOT_NAME:-}
+      # Which arms have Rethink's electric gripper (settings file; docs/moveit.md).
+      - LEFT_ELECTRIC_GRIPPER=${LEFT_ELECTRIC_GRIPPER:-0}
+      - RIGHT_ELECTRIC_GRIPPER=${RIGHT_ELECTRIC_GRIPPER:-0}
+      - DISPLAY=${DISPLAY:-:0}
+      - LIBGL_ALWAYS_SOFTWARE=${RVIZ_SOFTWARE_RENDERING:-1}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix    # the screen of the machine Docker runs on
+      - ./bridge_config/dds:/config/dds:ro
+      - /etc/localtime:/etc/localtime:ro
+      # The folder your programs are in, as /project (as for the client container).
+      - ${PROJECT_DIR:-.}:/project
+      - ./examples:/examples
+    working_dir: /project
+    profiles: ["tools"]
+
+  # Robot inventory (read only): docker compose run --rm inventory
+  # Runs in ROS 1 Noetic with the Baxter messages from msgs/ros1, so its checksum
+  # comparison shows directly whether those messages fit the robot.
+  # Results land in docs/robot-inventory/ on the host.
+  inventory:
+    build:
+      context: .
+      dockerfile: docker/noetic/Dockerfile
+    image: ${BAXTER_IMAGES:-ghcr.io/hull-robotics-society}/baxter-noetic:1.0.0
+    network_mode: host
+    environment:
+      - ROS_MASTER_URI=${ROS_MASTER_URI}
+      - ROS_IP=${ROS_IP}
+    # ROS 1 programs announce themselves by host name, and containers cannot look up the
+    # robot's .local name. This makes the name from .env resolve inside the container.
+    # (Without ROBOT_HOSTNAME in .env the entry is a harmless placeholder.)
+    extra_hosts:
+      - "${ROBOT_HOSTNAME:-robot.invalid}:${ROBOT_IP:-127.0.0.1}"
+      # A second name for the same robot: its programs may announce themselves under
+      # another name than the one in ROS_MASTER_URI (e.g. <serial>.local).
+      - "${ROBOT_HOSTNAME_2:-robot2.invalid}:${ROBOT_IP:-127.0.0.1}"
+      # A second computer whose programs are part of the robot's ROS 1 system, such as the
+      # Mobility Base's own one (BASE_HOSTNAME and BASE_IP in .env).
+      - "${BASE_HOSTNAME:-base.invalid}:${BASE_IP:-127.0.0.1}"
+    volumes:
+      - ./scripts:/scripts:ro
+      - ./docs/robot-inventory:/out
+      - /etc/localtime:/etc/localtime:ro   # local time in the results and their folder name
+    command: ["bash", "/scripts/robot_inventory.sh", "/out"]
+    profiles: ["tools"]

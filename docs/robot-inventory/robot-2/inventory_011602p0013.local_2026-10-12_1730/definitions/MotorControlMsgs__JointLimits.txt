@@ -1,0 +1,11 @@
+type: MotorControlMsgs/JointLimits
+md5: 0808343db8e3a26125dc8041940510d1
+
+# names of the joints
+string[] jointNames
+
+#lower bounds of the joints
+float64[] lower
+
+#upper bounds of the joints
+float64[] upper

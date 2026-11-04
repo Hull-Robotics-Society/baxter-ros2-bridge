@@ -1,0 +1,7 @@
+type: baxter_core_msgs/HeadState
+md5: 71c43b264307205358e7e49be5601348
+
+float32 pan
+bool isTurning
+bool isNodding
+bool isPanEnabled

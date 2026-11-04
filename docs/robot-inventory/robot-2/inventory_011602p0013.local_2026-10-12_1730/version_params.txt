@@ -1,0 +1,12 @@
+rethink/software_version: 1.2.0.57
+/firmware_api/flags/JRCP_VERSION_MASK: 128
+/firmware_api/variables/VAR_MLX90363_DEBUG_0_FIRMWARE_VERSION: 1
+/firmware_api/variables/VAR_MLX90363_DEBUG_0_HARDWARE_VERSION: 0
+/firmware_api/variables/VAR_MLX90363_DEBUG_1_FIRMWARE_VERSION: 21
+/firmware_api/variables/VAR_MLX90363_DEBUG_1_HARDWARE_VERSION: 20
+/jrcp/version: 1.2.0.57
+/rethink/software_version: 1.2.0.57
+/rosversion: '1.11.8
+
+  '
+/version: v3.3.02

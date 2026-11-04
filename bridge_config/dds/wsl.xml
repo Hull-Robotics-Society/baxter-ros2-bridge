@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- ROS 2 network settings for a bridge machine that is WSL2 with "mirrored" networking.
+     Select with DDS_PROFILE=wsl in .env.
+
+     Why: in mirrored mode everything sent to 127.0.0.1 takes a detour through Windows,
+     and packets larger than about 1470 bytes are lost on it (measured 6 Oct 2026). ROS 2
+     programs on one machine find each other with larger packets than that on 127.0.0.1,
+     so with the normal settings they never do. This file makes them use WSL's own
+     internal address 10.255.255.254 instead, which stays inside Linux, plus shared
+     memory for the data itself.
+
+     The shared memory area keeps its normal size (about 0.5 MB per program). For a day
+     it was set to 64 MB here (segment_size), on the idea that camera pictures of 1 MB do
+     not fit otherwise. Measured on 8 Oct 2026 with two cameras at 25 pictures of 0.77 MB
+     per second each, through the bridge in fixed_list mode: the normal size, 2, 4, 16
+     and 64 MB all delivered the pictures equally evenly. A larger area has a price,
+     though: every ROS 2 program takes the whole size as real memory when it starts, and
+     a program that is stopped hard leaves its area behind (/dev/shm filled up to 3.6 GB
+     within a day). So: do not raise it without a measurement that shows a gain.
+
+     Limit: only programs on this machine see each other. For programs on another
+     computer, add a second <address> line with this machine's address on that network. -->
+<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+  <transport_descriptors>
+    <transport_descriptor>
+      <transport_id>udp_inside_wsl</transport_id>
+      <type>UDPv4</type>
+      <interfaceWhiteList>
+        <address>10.255.255.254</address>
+      </interfaceWhiteList>
+    </transport_descriptor>
+    <transport_descriptor>
+      <transport_id>shared_memory</transport_id>
+      <type>SHM</type>
+    </transport_descriptor>
+  </transport_descriptors>
+  <participant profile_name="wsl_mirrored" is_default_profile="true">
+    <rtps>
+      <userTransports>
+        <transport_id>udp_inside_wsl</transport_id>
+        <transport_id>shared_memory</transport_id>
+      </userTransports>
+      <useBuiltinTransports>false</useBuiltinTransports>
+    </rtps>
+  </participant>
+</profiles>

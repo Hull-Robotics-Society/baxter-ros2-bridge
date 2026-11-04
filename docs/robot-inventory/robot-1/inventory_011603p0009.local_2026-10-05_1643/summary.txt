@@ -1,0 +1,32 @@
+Baxter inventory, Mon Oct  5 16:48:35 UTC 2026
+ROS master:        http://011603p0009.local:11311
+Software version:  1.2.0.57
+Nodes / topics / services: 23 / 271 / 93
+Not checked (no messages during the recording; verify by commanding the robot):
+  74 types, of which Baxter / Mobility Base:
+    baxter_core_msgs/AnalogIOState
+    baxter_core_msgs/AnalogIOStates
+    baxter_core_msgs/AnalogOutputCommand
+    baxter_core_msgs/AssemblyState
+    baxter_core_msgs/CollisionAvoidanceState
+    baxter_core_msgs/CollisionDetectionState
+    baxter_core_msgs/DigitalIOState
+    baxter_core_msgs/DigitalIOStates
+    baxter_core_msgs/DigitalOutputCommand
+    baxter_core_msgs/EndEffectorCommand
+    baxter_core_msgs/EndEffectorProperties
+    baxter_core_msgs/EndEffectorState
+    baxter_core_msgs/EndpointState
+    baxter_core_msgs/HeadPanCommand
+    baxter_core_msgs/HeadState
+    baxter_core_msgs/HomingCommand
+    baxter_core_msgs/HomingState
+    baxter_core_msgs/JointCommand
+    baxter_core_msgs/NavigatorState
+    baxter_core_msgs/NavigatorStates
+    baxter_core_msgs/RobustControllerStatus
+    baxter_core_msgs/SEAJointState
+    baxter_core_msgs/URDFConfiguration
+    baxter_maintenance_msgs/CalibrateArmEnable
+    baxter_maintenance_msgs/TareEnable
+Mobility Base topics: 0

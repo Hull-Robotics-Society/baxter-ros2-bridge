@@ -1,0 +1,14 @@
+type: baxter_core_msgs/NavigatorState
+md5: 680d121a1f16a32647298b292492fffd
+
+# buttons
+string[] button_names
+bool[] buttons
+
+# wheel position
+uint8   wheel
+
+# true if the light is on, false if not
+# lights map to button names
+string[] light_names
+bool[] lights

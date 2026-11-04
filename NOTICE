@@ -1,0 +1,34 @@
+baxter-ros2-bridge
+Copyright (c) 2026 Samuel Galla and the Hull Robotics Society
+
+This repository is licensed under the Apache License, Version 2.0 (LICENSE), except for
+the parts listed below, which keep the licences of their authors. The ROS packages that
+contain such parts declare that licence in their package.xml.
+
+Rethink Robotics (BSD licence, licenses/rethink-robotics-bsd.txt)
+  - msgs/ros1/baxter_core_msgs, msgs/ros1/baxter_maintenance_msgs: Baxter's message
+    definitions from baxter_common v1.2.0, unchanged. msgs/ros2/ holds their ROS 2
+    versions, generated from them by scripts/port_msgs_to_ros2.py.
+  - baxter_interface_ros2/: a port of the Baxter SDK's baxter_interface and baxter_tools
+    v0.7.0 to ROS 2 (BSD-3-Clause; baxter_interface_ros2/LICENSE). The pictures in
+    baxter_interface/images/ are from baxter_tools.
+  - moveit_config/reference/moveit_robots_baxter/: Rethink's MoveIt configuration for
+    Baxter, unchanged, kept for comparison and not built. moveit_config/ is made from it
+    (BSD-3-Clause).
+  - robot_model/xacro/baxter_grippers.urdf.xacro: made from baxter_description and
+    rethink_ee_description of baxter_common v1.2.0 (BSD-3-Clause). The robot model itself
+    is not part of this repository: robot_model/fetch_model.sh downloads it from Rethink
+    Robotics' GitHub.
+
+Rosen Diankov (Apache License 2.0)
+  - moveit_config/reference/moveit_robots_baxter/*/include/*/ikfast.h, part of the
+    reference copy above.
+
+Dataspeed Inc. (BSD licence, licenses/dataspeed-bsd.txt)
+  - msgs/ros1/mobility_base_core_msgs: the Mobility Base's message definitions from
+    Dataspeed's Mobility Base SDK 1.0.6, unchanged. msgs/ros2/mobility_base_core_msgs is
+    their ROS 2 version.
+
+The Docker images built from docker/ contain Ubuntu, ROS 1, ROS 2, ros1_bridge, MoveIt and
+other software under their own licences; they are installed from their usual sources
+when an image is built and are not part of this repository.

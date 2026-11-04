@@ -1,0 +1,13 @@
+MATCH         geometry_msgs/TwistStamped                    robot=98d34b0043a2093cf9d9345ab6eef12e local=98d34b0043a2093cf9d9345ab6eef12e
+MATCH         geometry_msgs/WrenchStamped                   robot=d78d3cb249ce23087ade7e7d0c40cfa7 local=d78d3cb249ce23087ade7e7d0c40cfa7
+NOT_INSTALLED mobility_base_core_msgs/BatteryState          robot=5be3d8e064f999d374776dac93192e11 local=Cannot locate [mobility_base_core_msgs/BatteryState]
+NOT_INSTALLED mobility_base_core_msgs/BumperState           robot=4bf2dca7ed731d753c7020f761380461 local=Cannot locate [mobility_base_core_msgs/BumperState]
+NOT_INSTALLED mobility_base_core_msgs/JoystickRaw           robot=cd2ba0d7e4dfc4d76d8484f6adc8f3c0 local=Cannot locate [mobility_base_core_msgs/JoystickRaw]
+NOT_INSTALLED mobility_base_core_msgs/Mode                  robot=26e5beeb0b10bdf271a32e9e5849a1cd local=Cannot locate [mobility_base_core_msgs/Mode]
+MATCH         rosgraph_msgs/Log                             robot=acffd30cd6b6de30f120938c17c593fb local=acffd30cd6b6de30f120938c17c593fb
+MATCH         sensor_msgs/CameraInfo                        robot=c9a58c1b0b154e0e6da7578cb991d214 local=c9a58c1b0b154e0e6da7578cb991d214
+MATCH         sensor_msgs/Imu                               robot=6a62c6daae103f4ff57a132d6f95cec2 local=6a62c6daae103f4ff57a132d6f95cec2
+MATCH         sensor_msgs/JointState                        robot=3066dcd76a6cfaef579bd0f34173e9fd local=3066dcd76a6cfaef579bd0f34173e9fd
+MATCH         std_msgs/Bool                                 robot=8b94c1b53db61fb6aed406028ad6332a local=8b94c1b53db61fb6aed406028ad6332a
+MATCH         std_msgs/Time                                 robot=cd7166c74c552c311fbcc2fe5a7bc289 local=cd7166c74c552c311fbcc2fe5a7bc289
+NOT_INSTALLED tf2_msgs/TFMessage                            robot=94810edda583a504dfda3829e70d7eec local=Cannot locate [tf2_msgs/TFMessage]

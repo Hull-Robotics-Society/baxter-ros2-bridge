@@ -1,0 +1,20 @@
+type: baxter_core_msgs/NavigatorStates
+md5: 2c2eeb02fbbaa6f1ab6c680887f2db78
+
+# used when publishing multiple navigators
+string[]         names
+NavigatorState[] states
+
+================================================================================
+MSG: baxter_core_msgs/NavigatorState
+# buttons
+string[] button_names
+bool[] buttons
+
+# wheel position
+uint8   wheel
+
+# true if the light is on, false if not
+# lights map to button names
+string[] light_names
+bool[] lights

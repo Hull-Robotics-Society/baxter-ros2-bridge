@@ -1,0 +1,5 @@
+date:           2026-10-12T17:30:27+01:00
+ROS_MASTER_URI: http://011602p0013.local:11311
+ROS_IP:         169.254.27.63  ROS_HOSTNAME: 
+local ROS:      noetic (noetic)
+local host:     Laptop-Samuel

@@ -1,0 +1,4 @@
+type: std_msgs/UInt16
+md5: 1df79edf208b629fe6b81923a544552d
+
+uint16 data

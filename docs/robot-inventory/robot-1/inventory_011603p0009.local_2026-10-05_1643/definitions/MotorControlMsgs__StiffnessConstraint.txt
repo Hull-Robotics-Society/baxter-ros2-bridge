@@ -1,0 +1,23 @@
+type: MotorControlMsgs/StiffnessConstraint
+md5: e3a824666502d83bd1ea2680585b6291
+
+Stiffness  stiffness
+Constraint linear_spring
+#Constraint angular_spring
+
+================================================================================
+MSG: MotorControlMsgs/Stiffness
+uint8 scale	  # scaling to apply to the constraint, 0-100%
+# level values:
+    uint8 STIFFNESS_ZERO    =   0
+    uint8 STIFFNESS_VERYLOW =   5
+    uint8 STIFFNESS_LOW     =  25
+    uint8 STIFFNESS_MED     =  50
+    uint8 STIFFNESS_HIGH    =  75
+    uint8 STIFFNESS_MAX     = 100
+#
+
+================================================================================
+MSG: MotorControlMsgs/Constraint
+float32 max        # absolute maximum level
+float32 active_max # scaled maximum level currently in use

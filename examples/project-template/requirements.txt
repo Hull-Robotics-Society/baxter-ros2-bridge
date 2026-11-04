@@ -1,0 +1,10 @@
+# Extra Python packages for this project, installed with pip when the container is built.
+# One package per line, best with a version, for example:
+#
+#   tabulate==0.9.0
+#
+# After changing this file: F1 -> "Dev Containers: Rebuild Container".
+#
+# Do NOT list numpy or opencv-python here: the container already has the versions that
+# ROS 2 and baxter_interface were built with, and pip would replace them with ones that
+# do not fit (pictures from the cameras would stop working).

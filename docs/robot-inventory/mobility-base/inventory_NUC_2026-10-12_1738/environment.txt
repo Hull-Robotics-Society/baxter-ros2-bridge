@@ -1,0 +1,5 @@
+date:           2026-10-12T17:38:14+01:00
+ROS_MASTER_URI: http://NUC:11311
+ROS_IP:         169.254.27.63  ROS_HOSTNAME: 
+local ROS:      noetic (noetic)
+local host:     Laptop-Samuel

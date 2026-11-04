@@ -1,0 +1,82 @@
+# Configuration of the bridge for the Dataspeed MOBILITY BASE (not the robot).
+#
+# The base is a ROS 1 system of its own, on the computer inside the base, and gets a
+# bridge of its own next to the robot's. Its settings file names this list:
+#   BRIDGE_CONFIG=/config/mobility_base.yaml     (see .env.base.example, docs/mobility-base.md)
+# The format is that of topics.yaml; read the notes at the top of that file.
+#
+# Topic and service names are Dataspeed's, as recorded from the lab's base on 12 Oct 2026
+# (base software 1.0.3, ROS Kinetic; docs/robot-inventory/).
+
+topics:
+  # --- Information about the base (ROS 1 parameters, published by robot_info.py) --------
+  - topic: /base_bridge/robot_info
+    type: std_msgs/msg/String
+
+  # --- State ----------------------------------------------------------------------------
+  - topic: /mobility_base/mode               # e-stop, disabled, joystick, program; 2 per second
+    type: mobility_base_core_msgs/msg/Mode
+  - topic: /mobility_base/battery            # every 2 seconds
+    type: mobility_base_core_msgs/msg/BatteryState
+  - topic: /mobility_base/bumper_states      # 10 per second
+    type: mobility_base_core_msgs/msg/BumperState
+  - topic: /mobility_base/twist              # measured speed, 250 per second
+    type: geometry_msgs/msg/TwistStamped
+  - topic: /mobility_base/wrench             # 250 per second
+    type: geometry_msgs/msg/WrenchStamped
+  - topic: /mobility_base/joint_states       # the four wheels, 250 per second
+    type: sensor_msgs/msg/JointState
+  - topic: /mobility_base/joystick           # what the wireless joystick asks for, 50 per second
+    type: geometry_msgs/msg/TwistStamped
+  - topic: /mobility_base/joystick_raw
+    type: mobility_base_core_msgs/msg/JoystickRaw
+  - topic: /mobility_base/imu/data_raw       # 100 per second
+    type: sensor_msgs/msg/Imu
+  - topic: /mobility_base/imu/is_calibrated
+    type: std_msgs/msg/Bool
+
+  # --- Commands -------------------------------------------------------------------------
+  # The base follows a speed command for a fifth of a second and then stops by itself.
+  - topic: /mobility_base/cmd_vel            # m/s forward and left, rad/s turning
+    type: geometry_msgs/msg/Twist
+    direction: to_robot
+  # While messages arrive here (at least 5 per second) the base IGNORES ITS JOYSTICK and
+  # follows programs, whatever the joystick's switches say. Then only the e-stop button
+  # stops the base by hand: whether the joystick's stop still works has not been tried.
+  # MobilityBase sends it only when a program asks for it (ignore_joystick=True).
+  - topic: /mobility_base/suppress_wireless
+    type: std_msgs/msg/Empty
+    direction: to_robot
+
+  # NOT bridged on purpose. Add a line only when you know why you need it:
+  #   /mobility_base/cmd_vel_raw        the same as cmd_vel with four times the
+  #                                     acceleration; for tested programs only
+  #   /mobility_base/bind_start, bind_stop, bind_status   pairing of a joystick
+  #   /mobility_base/set_wake_time, wake_time             std_msgs/Time has no ROS 2 twin
+  #   /mobility_base/cmd_relay                            purpose not documented
+  #
+  # The floor camera (640 x 480, 15 pictures per second) is left out to save load.
+  # To use it, remove the "# " from these lines:
+  # - topic: /mobility_base/floor_camera/image_rect
+  #   type: sensor_msgs/msg/Image
+  # - topic: /mobility_base/floor_camera/camera_info
+  #   type: sensor_msgs/msg/CameraInfo
+
+services_2_to_1:
+  - service: /mobility_base/get_max_speed
+    type: mobility_base_core_msgs/GetMaxSpeed
+  - service: /mobility_base/set_max_speed
+    type: mobility_base_core_msgs/SetMaxSpeed
+  # Not on the base: offered inside the bridge container (robot_info.py) and called
+  # through the bridge by bridge_guard.py, to notice a bridge that has stopped answering.
+  - service: /base_bridge/ping
+    type: std_srvs/Empty
+
+# Never list one of the base's own services here; see the note in topics.yaml.
+services_1_to_2: []
+
+# ROS 1 parameters of the base that are passed on to ROS 2, on /base_bridge/robot_info.
+robot_info_params:
+  - /mobility_base/software_version
+  - /rosdistro        # the ROS 1 version the base's computer runs (kinetic)
+  - /rosversion

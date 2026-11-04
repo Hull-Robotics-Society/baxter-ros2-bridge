@@ -1,0 +1,31 @@
+# The fastest MoveIt may ever move each joint. A request then asks for a SHARE of this:
+# baxter_interface.planning uses settings.PLANNING_SPEED and PLANNING_ACCELERATION (0.1
+# unless changed) or the speed= and acceleration= of a single move; RViz's panel has its
+# own two "Scaling" fields. 1.0 is everything in this file.
+#
+# The values are those of the configuration Rethink Robotics and MoveIt shipped for
+# Baxter (reference/moveit_robots_baxter): 3.0 rad/s and 3.0 rad/s^2 for every joint.
+# The speed is above the robot model's own limits (1.5 rad/s for shoulder and elbow,
+# 4.0 for the wrist); the robot's own controllers keep it within what the arm can do.
+# The top acceleration can be changed for one start without editing this file:
+#   ros2 launch baxter_moveit_config moveit.launch.py acceleration_limit:=2.0
+#
+# The position limits come from the robot model.
+default_velocity_scaling_factor: 0.3
+default_acceleration_scaling_factor: 0.3
+
+joint_limits:
+  left_s0: {has_velocity_limits: true, max_velocity: 3.0, has_acceleration_limits: true, max_acceleration: 3.0}
+  left_s1: {has_velocity_limits: true, max_velocity: 3.0, has_acceleration_limits: true, max_acceleration: 3.0}
+  left_e0: {has_velocity_limits: true, max_velocity: 3.0, has_acceleration_limits: true, max_acceleration: 3.0}
+  left_e1: {has_velocity_limits: true, max_velocity: 3.0, has_acceleration_limits: true, max_acceleration: 3.0}
+  left_w0: {has_velocity_limits: true, max_velocity: 3.0, has_acceleration_limits: true, max_acceleration: 3.0}
+  left_w1: {has_velocity_limits: true, max_velocity: 3.0, has_acceleration_limits: true, max_acceleration: 3.0}
+  left_w2: {has_velocity_limits: true, max_velocity: 3.0, has_acceleration_limits: true, max_acceleration: 3.0}
+  right_s0: {has_velocity_limits: true, max_velocity: 3.0, has_acceleration_limits: true, max_acceleration: 3.0}
+  right_s1: {has_velocity_limits: true, max_velocity: 3.0, has_acceleration_limits: true, max_acceleration: 3.0}
+  right_e0: {has_velocity_limits: true, max_velocity: 3.0, has_acceleration_limits: true, max_acceleration: 3.0}
+  right_e1: {has_velocity_limits: true, max_velocity: 3.0, has_acceleration_limits: true, max_acceleration: 3.0}
+  right_w0: {has_velocity_limits: true, max_velocity: 3.0, has_acceleration_limits: true, max_acceleration: 3.0}
+  right_w1: {has_velocity_limits: true, max_velocity: 3.0, has_acceleration_limits: true, max_acceleration: 3.0}
+  right_w2: {has_velocity_limits: true, max_velocity: 3.0, has_acceleration_limits: true, max_acceleration: 3.0}

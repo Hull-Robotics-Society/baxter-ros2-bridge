@@ -1,0 +1,5 @@
+rethink/software_version: <not set>
+/mobility_base/software_version: 1.0.3
+/rosversion: '1.12.7
+
+  '
