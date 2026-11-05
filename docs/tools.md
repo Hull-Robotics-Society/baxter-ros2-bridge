@@ -62,6 +62,9 @@ ros2 run baxter_interface enable_robot -S     # stop: like pressing the e-stop
 
 After an e-stop: release the button, then `-r`, then `-e`.
 
+If the arms are tucked, untuck them with `tuck_arms -u` instead of `-e`: enabled while
+tucked, the robot's collision avoidance pushes the arms away from the body by themselves.
+
 ### robot_info
 
 ```bash
@@ -91,9 +94,10 @@ ros2 run baxter_interface tuck_arms -u     # untuck: arms out to a working pose
 ros2 run baxter_interface tuck_arms -t     # tuck: arms folded close to the body, for transport or storage
 ```
 
-The robot is delivered "tucked". Untuck it at the start of a session, tuck it at the end
-if it is to be moved. The tool enables the robot itself and, when tucking, disables it
-again at the end.
+The robot is delivered "tucked". Untuck it at the start of a session, before anything
+else enables it, and tuck it at the end if it is to be moved. The tool enables the robot
+itself and, when tucking, disables it again at the end. A tucked robot enabled any other
+way pushes its arms away from the body by itself (its collision avoidance).
 
 Tucking passes very close to the head, so the tool switches off the robot's collision
 avoidance while it moves. **The arms swing widely: clear the space around the robot.**

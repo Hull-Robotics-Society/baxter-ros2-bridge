@@ -55,10 +55,13 @@ hands are. If it prints an error instead, the message says what is missing;
 
 ```bash
 ros2 run baxter_interface enable_robot -s      # the robot's state
-ros2 run baxter_interface enable_robot -e      # enable the motors   (-d disables)
-ros2 run baxter_interface tuck_arms -u         # arms to the "untucked" start pose
+ros2 run baxter_interface tuck_arms -u         # enables the robot, arms to the "untucked" start pose
 ros2 run baxter_interface robot_info           # software version, serial number, ...
 ```
+
+Untuck before anything else enables the robot: enabled while tucked, the robot's
+collision avoidance pushes the arms away from the body by themselves. `tuck_arms -u`
+switches collision avoidance off for its move.
 
 All tools are described in [tools.md](tools.md).
 

@@ -18,9 +18,12 @@ wireless joystick  ~~~>  the base's controller  <-- USB -->  the base's computer
 your program (ROS 2)  <->  the base's bridge  <-----------------------+
 ```
 
-- **The controller** drives the motors and listens to the joystick. It works without
-  any computer: with the base switched on and the e-stop released, the joystick drives
-  the base.
+- **The joystick** is a radio-control transmitter of the kind used for model aircraft
+  and drones, with Dataspeed's labels on it.
+- **The controller** drives the motors and listens to the joystick. The motors only get
+  power once the base's power button has been pressed, the same button that starts the
+  base's computer. The joystick drives right away; nothing has to run on that computer.
+  Then, with the e-stop released, the joystick drives the base.
 - **The base's computer** runs Dataspeed's driver, which offers the base as ROS 1 topics.
   It is a ROS 1 system of its own, separate from the robot's.
 - **The base's bridge** runs on the bridge machine next to the robot's bridge and
@@ -30,8 +33,9 @@ your program (ROS 2)  <->  the base's bridge  <-----------------------+
 
 1. Someone holds the joystick, knows it, and stays with it. Its left stick down stops
    the base at any time, whatever a program sends.
-2. The base's e-stop is within reach. Check it before the first drive of the day: with
-   it pressed the base must not move.
+2. The e-stop is within reach. The robot and the base share one e-stop button: pressing
+   it stops both. Check it before the first drive of the day: with it pressed the base
+   must not move.
 3. The robot's arms are tucked, or in a posture that stays inside the base's outline.
 4. Free floor around the base: at least 60 cm on all sides, more in the driving
    direction. No cables on the floor that the wheels can catch, the network cable
@@ -103,7 +107,8 @@ base's computer included, so that computer has to be off first:
    terminal, then `sudo shutdown -h now` (over SSH the connection then drops). One press
    of the computer's power button does the same (Dataspeed sets it up that way). Wait
    until it is off.
-4. Joystick off, e-stop pressed.
+4. Joystick off. Leave the e-stop released: a robot switched on with its e-stop pressed
+   refuses to be enabled ("robot is still resetting").
 5. Circuit breaker: press the red button (Dataspeed's "Shutdown"). The charging port
    works with the breaker off.
 
@@ -209,37 +214,13 @@ of the script):
 Dataspeed's documentation is offline; archived copies are in the Wayback Machine under
 `http://mbsdk.dataspeedinc.com/`.
 
-## A newer system on the base's computer
-
-Ubuntu 16.04 and ROS 1 Kinetic are long out of support, but the base's driver exists only
-as a ready-made program for Ubuntu 14.04 with ROS Indigo and Ubuntu 16.04 with ROS
-Kinetic. Dataspeed never published its source; its last build is from February 2020, and
-it will not load in ROS 1 Noetic. The rest of Dataspeed's SDK is published as source and
-could be built for Noetic, except the packages for position control (`pose_control`,
-`servo`, `kf`), which are ready-made programs too.
-
-The way to a newer system is therefore the old driver in a container:
-
-1. A newer Ubuntu on the computer (20.04 or later), with Docker.
-2. A container image with Ubuntu 16.04, ROS Kinetic and Dataspeed's packages.
-3. The base's USB device passed into the container, with the access rule Dataspeed's
-   package installs on a normal system; host networking.
-4. The laser scanners and the floor camera: each needs its device or network passed in
-   the same way.
-
-The driver talks to the base's controller through an ordinary USB library inside its own
-program, so it needs nothing special from the operating system. Build this on a second
-computer first (the base's USB cable moved over), and replace the base's own system only
-after that computer has driven the base.
-
 ## Limitations
 
 - The base's computer clock is behind (its clock battery is flat, and it has no time
   source without internet), so everything the base publishes carries a wrong time. To
   fix: replace the coin cell inside the computer (usually a CR2032), then set the time
   once.
-- The base reports its battery as "discharging" while it is on the charger.
 - Not tested yet: `ignore_joystick`, the speed-limit services, moving the arms while the
-  base drives, and the newer system above.
+  base drives.
 - The meaning of the modes, and that a program needs the joystick's "Computer" position,
   come from Dataspeed's documentation.

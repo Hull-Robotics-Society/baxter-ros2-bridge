@@ -5,6 +5,12 @@ list goes here, newest first, with the reason.
 
 ## Unreleased
 
+- Docs: untuck before enabling (an enabled tucked robot pushes its arms out), the robot
+  and the base share one e-stop, which stays released when switching off, and the base's
+  motors only get power once its power button is pressed, also for the joystick. Removed
+  the battery note from the Mobility Base limitations and the section on a newer system
+  for the base's computer (not needed by the bridge or the libraries).
+
 ## 1.0.0 (4 Nov 2026)
 
 The first public release.
